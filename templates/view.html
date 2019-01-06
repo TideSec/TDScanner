@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <title>TDScanner</title>
+	    <link rel = "stylesheet" type = "text/css" href = "/static/css/style.css">
+	    <link rel = "stylesheet" type = "text/css" href = "/static/css/bootstrap.css">
+	    <link rel = "stylesheet" href = "/static/css/font-awesome.css">
+	    <link rel = "stylesheet" type = "text/css" href = "/static/css/style.css">    
+	    <link rel = "stylesheet" href = "/static/css/animate.css">
+	</head>
+	<body >
+	    <header class="navbar navbar-static-top bs-docs-nav" id="top" role="banner">
+		  <div class="container">
+{#		    <div class="navbar-header">#}
+{#		      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false">#}
+{#		        <span class="sr-only">Toggle navigation</span>#}
+{#		        <span class="icon-bar"></span>#}
+{#		        <span class="icon-bar"></span>#}
+{#		        <span class="icon-bar"></span>#}
+{#		      </button>#}
+{#		      <a href="../" class="navbar-brand">任务列表</a>#}
+{#		    </div>#}
+		    <nav id="bs-navbar" class="collapse navbar-collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+					  	<a href="/index">TDScan</a>
+					</li>
+					<li>
+					  	<a href="/manager">任务管理</a>
+					</li>
+					<li>
+					  	<a href="/manager">注入检测</a>
+					</li>		        
+				</ul>
+		    </nav>		   
+		  </div>
+		</header>
+
+{#		<div class="bs-docs-header" id="content" tabindex="-1">#}
+{#	      <div class="container">#}
+{#	        <h1 class="text-center">信息收集</h1>#}
+{#	        <p class="lead">#}
+{#		      	<a href="/manager" class="btn btn-outline-inverse btn-lg trace-btn">项目列表</a>#}
+{#		      	<a href="/download/" class="btn btn-outline-inverse btn-lg trace-btn">注入检测</a>#}
+{#		    </p>#}
+{#	      </div>#}
+{#	    </div>#}
+        <div class="bs-docs-header1" id="content" tabindex="-1">
+	      <div class="container">
+	        <h1 class="text-center">信息搜集结果</h1>
+
+	      </div>
+	    </div>
+	    <div class="container">
+			<ul class="list-group">
+				<li class="list-group-item active">目标项目信息收集</li>
+				{% for info in result_infos %}
+	    			<div class="alert alert-success">{{info}}</div>
+				{% endfor %}
+
+			</ul>
+
+{#            <ul class="list-group">#}
+{#                <li class="list-group-item active">域名:</li>#}
+{##}
+{#				<li class="list-group-item"><span class="label label-default">{{target}}</span></li>#}
+{##}
+{#                <li class="list-group-item active">扫描任务ID:</li>#}
+{#                <li class="list-group-item"><span class="label label-default">{{id}}</span></li>#}
+{##}
+{##}
+{#				<li class="list-group-item active">可能存在的注入:</li>#}
+{#	    	{% for url in target_urllist %}#}
+{##}
+{#	    		<li class="list-group-item"><span class="label label-warning">{{target_urllist}}</span></li>#}
+{##}
+{#			 {% endfor %}#}
+{#				<li class="list-group-item active">主页探测的ip:</li>#}
+{#	    	{% for ip in iplist %}#}
+{##}
+{#	    		<li class="list-group-item"><span class="label label-info">{{ip}}</span></li>#}
+{##}
+{#			 {% endfor %}#}
+{#				<li class="list-group-item active">网站目录爆破:</li>#}
+{#	    	{% for dir in collect_dirs %}#}
+{##}
+{#	    		<li class="list-group-item"><span class="label label-danger">{{dir}}</span></li>#}
+{##}
+{#			 {% endfor %}#}
+{#				<li class="list-group-item active">常用端口检测:</li>#}
+{#	    	{% for port in collect_ports %}#}
+{##}
+{#	    		<li class="list-group-item"><span class="label label-info">{{port}}</span></li>#}
+{##}
+{#			 {% endfor %}#}
+{#				<li class="list-group-item active">子域名爆破:</li>#}
+{#	    	{% for sub in subdomain %}#}
+{##}
+{#	    		<li class="list-group-item"><span class="label label-success">{{sub}}</span></li>#}
+{##}
+{#			 {% endfor %}#}
+{#			</ul>#}
+	    </div>
+	    
+
+	</body>	    
+	<script type = "text/javascript" src="/static/js/jquery-2.0.3.min.js"> </script>
+	<script type = "text/javascript" src="/static/js/bootstrap.js"></script>
+	<script type = "text/javascript" src="/static/js/Chart.min.js"></script>
+	<script type="text/javascript">
+		
+
+	</script>	
+</html>

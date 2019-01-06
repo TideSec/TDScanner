@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %} 常规分析记录查询---动态样本查询 {% endblock %}
+{% block history_result %} active {% endblock %}
+{% block content %}
+<!--页面大标题及描述-->
+<h1>常规分析记录</h1>
+<p class="describe">您可以在此查找所有已经处理完毕的样本的处理记录</p>
+<!--分割线-->
+<div class="separator"></div>
+<!--搜索功能区-->
+<div class="content" style="margin:0 auto;width:1200px">
+    <div name="search" id="search" role="search">
+        <button class="fa fa-search fa-lg btn btn-default" style="float:right" id="searchBtn"></button>
+        <input type="text" id="search_info"class="form-control nav-input-search " style="width: 250px;font-size: 12px;
+            height: 22px;float:right" placeholder="文件名、HASH、时间(年-月-日)">
+    </div>
+</div>
+
+<div class = "content" style="margin:0 auto;width:1200px" >
+    {% for item in result["content"] %}
+        <div class="bs-callout bs-callout-repeat">        
+                <h4>{{item.file_name}}</h4>
+                <div class="record">
+                    <div style="width:60%;margin-top:15px">
+                        <span style="width:50%;margin-top:15px;">Hash：{{item.md5}}.{{item.crc32}}</span>
+                    </div>
+                    <div style="width:50%;float:left;margin-top:10px">文件类型：{{item.file_type}}</div>
+                    <div style="width:20%;float:left;margin-top:10px">文件大小：{{item.file_size}}</div>
+                    <div style="width:20%;float:left;margin-top:10px">该样本已被分析：{{item.total_analysis}}次</div>
+                    <a data-toggle="collapse" href="{{item.md5}}" style="float:left;width:10%;margin-top:10px" onfocus="blur()"><i class="fa fa-caret-down"></i>  查看记录</a>   
+                </div>
+
+                <div class = "insert-place">
+                    <div style="display:none">{{item.md5}}.{{item.crc32}}</div><!-- 为js能够获取到文件的hash值，由于hash数据用jinja在前台渲染返回了 -->
+                </div>
+
+        </div>
+    {% endfor %}
+    <div>
+        <span id="str_page"></span>
+        <ul class="page_the_show pagination" style="float:right;margin-bottom:50px;margin-top:-5px">
+        </ul>        
+    </div>
+
+    <ul class="page_the_hide pagination" style="float:right;margin-bottom:50px;margin-top:-10px;display:none">
+        <li><a id = "pre" ><span>&laquo;</span></a></li>
+        <li><a id = "first"><span>首页</span></a></li>
+        {% if result.count%result.page_size==0 %}
+            {% for num in range(1,(result.count//result.page_size)+ 1) %}
+                {% if result.condition==''%}
+                    <li><a href="/history_record/{{num}}/{{result.page_size}}"><span>{{num}}</span></a></li>
+                {% endif %}
+                {% if result.condition!=''%}
+                    <li><a href="/history_record/{{num}}/{{result.page_size}}/{{result.condition}}"><span>{{num}}</span></a></li>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            {% for num in range(1,(result.count//result.page_size)+ 2) %}
+                {% if result.condition==''%}
+                    <li><a href="/history_record/{{num}}/{{result.page_size}}"><span>{{num}}</span></a></li>
+                {% endif %}
+                {% if result.condition!=''%}
+                    <li><a href="/history_record/{{num}}/{{result.page_size}}/{{result.condition}}"><span>{{num}}</span></a></li>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        <li><a id = "last"><span>尾页</span></a></li>   
+        <li><a><span>&raquo;</span></a></li>
+    </ul>  
+    
+    <div id="page_num" style="display:none">
+        {% if result.count%result.page_size==0 %}
+            {{(result.count//result.page_size)}}
+        {% else %}
+            {{(result.count//result.page_size)+1}}
+        {% endif %}
+    </div>
+    <div id="result_count" style="display:none">{{result.count}}</div>  
+</div>
+{% endblock %}

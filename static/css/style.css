@@ -1,0 +1,184 @@
+body { 
+    font-family: "Helvetica Neue", Helvetica, Microsoft Yahei, Hiragino Sans GB, WenQuanYi Micro Hei, sans-serif;
+    background-color: #eee
+}
+.bs-docs-nav{
+    margin-bottom: 0px;
+}
+.bs-docs-header, .bs-docs-masthead {
+    position: relative;
+    padding: 30px 0;
+    color: #cdbfe3;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(0,0,0,.1);
+    background-image: url(./image/dt.png );
+    background-position:center;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    -moz-background-size:100% 100%;
+    /*background-color: #7c2526;*/
+    /*background-image: -webkit-gradient(linear,left top,left bottom,from(#1e1e1e),to(#272822));*/
+    /*background-image: -webkit-linear-gradient(top, #1e1e1e 0, #272822 50%);*/
+    /*background-image: -o-linear-gradient(top, #1e1e1e 0, #272822 50%);*/
+    /*background-image: linear-gradient(to bottom, #1e1e1e 0, #272822 50%);*/
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#563d7c', endColorstr='#6F5499', GradientType=0);
+    background-repeat: no-repeat;
+
+    margin-bottom: 40px;
+    font-size: 20px;
+   
+    padding-top: 60px;
+    padding-bottom: 60px;
+    font-size: 24px;
+    text-align: left;
+}
+
+.bs-docs-header h1 {
+    display: block;
+    font-size: 60px;
+    -webkit-margin-before: 0.67em;
+    -webkit-margin-after: 0.67em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
+    color:#fff;
+}
+
+
+.bs-docs-header1, .bs-docs-masthead1 {
+    position: relative;
+    padding: 30px 0;
+    color: #cdbfe3;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(0,0,0,.1);
+    background-image: url(./image/dt.png );
+    background-position:center;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    -moz-background-size:100% 100%;
+    background-repeat: no-repeat;
+
+    /*background-color: #7c2526;*/
+    /*background-image: -webkit-gradient(linear,left top,left bottom,from(#1e1e1e),to(#272822));*/
+    /*background-image: -webkit-linear-gradient(top, #1e1e1e 0, #272822 50%);*/
+    /*background-image: -o-linear-gradient(top, #1e1e1e 0, #272822 50%);*/
+    /*background-image: linear-gradient(to bottom, #1e1e1e 0, #272822 50%);*/
+    /*background-repeat: repeat-x;*/
+
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#563d7c', endColorstr='#6F5499', GradientType=0);
+
+    margin-bottom: 10px;
+    font-size: 20px;
+
+    padding-top: 30px;
+    padding-bottom: 40px;
+    font-size: 24px;
+    text-align: left;
+}
+
+.bs-docs-header1 h1 {
+    display: block;
+    font-size: 60px;
+    -webkit-margin-before: 0.67em;
+    -webkit-margin-after: 0.67em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
+    color:#fff;
+}
+
+
+.bs-docs-featurette-title{
+    padding-top: 50px;
+    margin-bottom: 5px;
+    font-size: 30px;
+    font-weight: 400;
+    color: #333;
+    text-align: center;
+}
+
+.lead {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color:#888888;
+    font-weight: 300;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.lead2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #ffffff;
+    font-weight: 300;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.btn-outline-inverse {
+    color: #fff;
+    background-color: transparent;
+    border-color: #cdbfe3;
+}
+   
+.bs-callout {
+    padding: 10px 20px;
+    margin: 20px 40px;
+    border: 1px solid #fff;
+    border-left-width: 5px;
+    border-radius: 3px;
+    margin-top: -5px;
+    border-left-color: #6f5499;
+}
+
+.dl-horizontal dt {
+    width: 40px;
+}
+
+.dl-horizontal dd{
+    margin-left:80px;
+} 
+
+
+
+.lead a:hover{
+    background-color: #fff;
+    color: #6f5499;
+}
+
+.lead a:active{
+    background-color: #6f5499;
+    color: #fff;
+}
+
+.trace-btn {
+    padding: 15px 30px;
+    font-size: 20px;
+    margin: 0 15px;
+}
+
+.upload-label{
+    font-size: 15px;
+    color: #eee;
+}
+
+tr > td {
+    font-weight: 900;
+}
+
+.label-name{
+    font-weight: 900;
+    font-size: 15px;
+    color: #eee;
+}
+
+td > a{
+	text-decoration:none
+}
+
+td > a:hover{
+	color: rgb(127, 0, 189);
+	text-decoration:none;
+	cursor:pointer
+}
+

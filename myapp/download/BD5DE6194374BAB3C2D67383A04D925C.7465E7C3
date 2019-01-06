@@ -1,0 +1,2527 @@
+--
+-- PostgreSQL database dump
+--
+CREATE DATABASE sample_data
+  WITH OWNER = postgres
+       ENCODING = 'UTF8'
+       TABLESPACE = pg_default
+       LC_COLLATE = 'en_US.UTF8'
+       LC_CTYPE = 'en_US.UTF8'
+       CONNECTION LIMIT = -1;
+	   
+\c sample_data;
+
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- Name: dblink; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS dblink WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION dblink; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION dblink IS 'connect to other PostgreSQL databases from within a database';
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: attention_virus(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION attention_virus() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+declare
+	delta_person_id integer;
+	delta_cve_name text;
+	delta_state text;
+	delta_r_time timestamp;
+
+begin
+	if (TG_OP = 'INSERT') then
+		if ( new.state = 'y' ) then
+			delta_person_id = new.person_id;
+			delta_cve_name = new.cve_name;
+			delta_r_time = new.r_time;
+		end if;
+
+		insert into s_attention_num(person_id, virus_name, r_time)
+		values
+		(delta_person_id, delta_cve_name, delta_r_time)
+		;	
+		/*		
+		insert into s_attention_num(id, person_id, virus_name, r_time)
+		select new.id, new.person_id, new.cve_name, new.r_time from s_attention_cve
+			where state = 'y'
+				and person_id = new.person_id
+				and cve_name = new.cve_name
+		;
+		*/
+	ELSIF (TG_OP = 'UPDATE') THEN
+		delta_person_id = new.person_id;
+		delta_cve_name = new.cve_name;
+		delta_r_time = new.r_time;
+		if ( new.state = 'n' ) then
+			update s_attention_num a set status = 0
+			where person_id = delta_person_id
+				and virus_name = delta_cve_name
+			;
+		end if;
+
+		if ( new.state = 'y' ) then
+			update s_attention_num a set status = 1
+			where person_id = delta_person_id
+				and virus_name = delta_cve_name
+			;
+		end if;
+		
+	end if;	
+	
+	RETURN NULL;
+end;
+$$;
+
+
+ALTER FUNCTION public.attention_virus() OWNER TO postgres;
+
+--
+-- Name: delete_statistics(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION delete_statistics() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+declare
+	lmaxid integer;
+	dmaxid integer;
+begin
+	delete from s_cve_total;
+	delete from s_file_format_list;
+	delete from s_samplesum_bysource;
+	delete from s_source_list;
+	delete from s_virus_family_list;
+	delete from s_virus_name_list;
+	delete from s_virus_type_list;
+	delete from s_virus_family;
+	delete from s_virus_name;
+	delete from s_auto_statistics;
+	delete from s_cve_sample;
+
+	perform setval('s_cve_total_id_seq', 1);
+	perform setval('s_file_format_list_id_seq', 1);
+	perform setval('s_samplesum_bysource_id_seq', 1);
+	perform setval('s_source_list_id_seq', 1);
+	perform setval('s_virus_family_list_id_seq', 1);
+	perform setval('s_virus_name_list_id_seq', 1);
+	perform setval('s_virus_type_list_id_seq', 1);
+	perform setval('s_virus_family_list_id_seq', 1);
+	perform setval('s_virus_name_list_id_seq', 1);
+	perform setval('s_auto_statistics_id_seq', 1);
+	perform setval('s_cve_sample_id_seq', 1);
+
+	update sys_record_table set record_id = 0
+	where fun_name in ('s_sample_repeat', 's_sample_uniq', 's_final_result');
+	--select * from sys_record_table
+	
+	return 0;
+	exception when others then
+		RAISE EXCEPTION '(%)', SQLERRM;
+		return 1;
+end;
+$$;
+
+
+ALTER FUNCTION public.delete_statistics() OWNER TO postgres;
+
+
+
+--
+-- Name: s_sample_statistics(integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION s_sample_statistics(i integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+declare
+	lmaxid integer;
+	dmaxid integer;
+	
+	slmaxid integer;
+	sdmaxid integer;
+begin
+	set work_mem = '2GB';
+
+	--来源统计，样本首发编号获取
+	select last_value into dmaxid from s_sample_uniq_id_seq;
+	select record_id into lmaxid From sys_record_table
+	where fun_name = 's_sample_uniq';
+	
+	--来源统计，样本重复编号获取
+	select last_value into sdmaxid from s_sample_repeat_id_seq;
+	select record_id into slmaxid From sys_record_table
+	where fun_name = 's_sample_repeat';
+
+	 if dmaxid > lmaxid or sdmaxid > slmaxid then
+		if dmaxid > lmaxid + i then
+			dmaxid = lmaxid + i;
+		end if;
+	
+		if sdmaxid > slmaxid + i then
+			sdmaxid = slmaxid + i;
+		end if;
+
+		with temp_s_sample_uniq as(
+			select md5, file_type, source_e_name, r_time from s_sample_uniq
+			where id <= dmaxid
+				and id > lmaxid
+		), temp_s_sample_repeat as(
+			select md5, source_e_name, r_time from s_sample_repeat
+			where id <= sdmaxid
+				and id > slmaxid
+		), insert_s_source_list_uniq as(
+			insert into s_source_list(source_e_name, sample_num, uniq_num, r_time)
+			select COALESCE(a.source_e_name, b.source_e_name), COALESCE(a.total_count, 0), 
+				COALESCE(b.uniq_count, 0), COALESCE(a.day_time, b.day_time) 
+				from 
+				(
+					select source_e_name, count(1) as total_count, date_trunc('day', r_time) as day_time 
+									from temp_s_sample_repeat
+								group by date_trunc('day', r_time), source_e_name
+				)a
+			full join
+				(
+				select source_e_name, count(1) as uniq_count, date_trunc('day', r_time) as day_time 
+								from temp_s_sample_uniq
+							group by date_trunc('day', r_time), source_e_name
+				)b
+			on a.source_e_name = b.source_e_name and a.day_time = b.day_time
+		), insert_s_file_format_list as (
+			insert into s_file_format_list(source_e_name, archive, document, picture, 
+					script, text, binexecute, media, softdata, other, r_time)
+			select source_e_name, 
+				sum(case when file_type like 'Archive%' then 1 else 0 end) as Archive,
+				sum(case when file_type like 'Document%' then 1 else 0 end) as Document,
+				sum(case when file_type like 'Picture%' then 1 else 0 end) as Picture,
+				sum(case when file_type like 'Script%' then 1 else 0 end) as Script,
+				sum(case when file_type like 'Text%' then 1 else 0 end) as Text,
+				sum(case when file_type like 'BinExecute%' then 1 else 0 end) as BinExecute,
+				sum(case when file_type like 'Media%' then 1 else 0 end) as Media,
+				sum(case when file_type like 'SoftData%' then 1 else 0 end) as SoftData,
+				sum(case when file_type not like 'Archive%'
+						and file_type not like 'Document%'
+						and file_type not like 'Picture%'
+						and file_type not like 'Script%'
+						and file_type not like 'Text%'
+						and file_type not like 'BinExecute%'
+						and file_type not like 'Media%'
+						and file_type not like 'SoftData%'
+						or file_type is null
+					then 1 else 0 end),
+				date_trunc('day', r_time) 
+				from temp_s_sample_uniq
+			group by source_e_name, date_trunc('day', r_time)
+		)
+		update sys_record_table set record_id = sdmaxid
+		where fun_name = 's_sample_repeat';
+		update sys_record_table set record_id = dmaxid
+		where fun_name = 's_sample_uniq';
+	 end if;
+	
+
+	
+	--样本管理系统统计
+	select last_value into dmaxid from s_final_result_id_seq;
+	select record_id into lmaxid From sys_record_table
+	where fun_name = 's_final_result';
+
+	raise notice 'lmaxid is %', lmaxid;
+	raise notice 'dmaxid is %', dmaxid;
+
+	if dmaxid > lmaxid then
+		if dmaxid > lmaxid + i then
+			dmaxid = lmaxid + i;
+		end if;
+
+		with temp_s_final_result as (
+			select md5, crc32, source_e_name, file_type, extension, is_virus, auto_from,
+				size, final_result, virus_type, virus_from, virus_name, r_time,
+				is_file_monitor, is_danger_behavior, is_network_monitor,
+				is_process_monitor, is_register_monitor, is_other_behavior
+				from s_final_result
+			where id > lmaxid
+				and id <= dmaxid
+		), select_count as( 
+			select virus_name, count(1) as count 
+				from temp_s_final_result
+			where is_virus is true
+			group by virus_name
+		), insert_s_samplesum_bysource as(
+			insert into s_samplesum_bysource(sourcename, sample_count, trustsum, notrustsum, unknownsum, r_time)
+			select source_e_name, count(*), sum(case when final_result = 'yes' then 1 else 0 end ),
+					sum(case when final_result = 'no' then 1 else 0 end ),
+					sum(case when final_result = 'unknown' then 1 else 0 end ),
+					date_trunc('day', r_time)
+				from temp_s_final_result
+			--where source_e_name is not null
+			group by source_e_name, date_trunc('day', r_time)
+		/*
+		), insert_s_file_format_list as(
+			insert into s_file_format_list(source_e_name, file_format, sample_num, r_time)
+			select source_e_name, file_type, count(*), date_trunc('day', r_time)
+				from temp_s_final_result
+			group by source_e_name, file_type, date_trunc('day', r_time)
+		*/
+		), insert_s_cve_total as(
+			insert into s_cve_total(source_e_name, cve_name, sample_num, r_time)
+			select source_e_name, virus_name, count(*), date_trunc('day', r_time)
+				from temp_s_final_result
+			where virus_name like '%CVE-%'
+			group by source_e_name, virus_name, date_trunc('day', r_time)
+		), insert_s_virus_type_list as(
+			insert into s_virus_type_list(source_e_name, hack, troj, worm, virus, riskware, 
+						spyware, exploit, junkfile, testfile, heur, unknown, r_time)
+			select source_e_name,
+				sum(case when virus_type = 'hack' then 1 else 0 end) as hack, 
+				sum(case when virus_type = 'troj' then 1 else 0 end) as troj,
+				sum(case when virus_type = 'worm' then 1 else 0 end) as worm,
+				sum(case when virus_type = 'virus' then 1 else 0 end) as virus,
+				sum(case when virus_type = 'riskware' then 1 else 0 end) as riskware,
+				sum(case when virus_type = 'spyware' then 1 else 0 end) as spyware,
+				sum(case when virus_type = 'exploit' then 1 else 0 end) as exploit,
+				sum(case when virus_type = 'junkfile' then 1 else 0 end) as junkfile,
+				sum(case when virus_type = 'testfile' then 1 else 0 end) as testfile,
+				sum(case when virus_type = 'heur' then 1 else 0 end) as heur,
+				sum(case when virus_type = 'unknown' or virus_type is null then 1 else 0 end) as unknown,
+				date_trunc('day', r_time)
+				from temp_s_final_result
+			where is_virus is true
+			group by source_e_name, date_trunc('day', r_time)
+		), insert_s_virus_name_list as(
+			insert into s_virus_name_list(source_e_name, virus_name, sample_num, r_time)
+			select source_e_name, virus_name, count(*), date_trunc('day', r_time)
+				from temp_s_final_result
+			where is_virus is true
+			group by source_e_name, virus_name, date_trunc('day', r_time)
+		/*
+		), insert_s_virus_famliy_list as(
+			insert into s_virus_famliy_list(source_e_name, virus_family, sample_num, r_time)
+			select source_e_name, split_part(virus_name, '.', 1)||'.'||split_part(virus_name, '.', 2), 
+					count(*), date_trunc('day', r_time)
+				from temp_s_final_result
+			where is_virus is true
+			group by source_e_name, split_part(virus_name, '.', 1)||'.'||split_part(virus_name, '.', 2), 
+				date_trunc('day', r_time)
+		), insert_s_virus_family as(
+			insert into s_virus_family(virus_family, ex_time)
+			select split_part(a.virus_name, '.', 1)||'.'||split_part(a.virus_name, '.', 2), a.r_time
+				from temp_s_final_result a
+			where a.is_virus is true
+				and not exists(select 1 from s_virus_family b
+					where split_part(a.virus_name, '.', 1)||'.'||split_part(a.virus_name, '.', 2) = b.virus_family
+					)
+		), insert_s_virus_platform as(
+			insert into s_virus_platform(virus_platform, ex_time)
+			select split_part(split_part(a.virus_name, '.', 1), '/', 2), a.r_time
+				from temp_s_final_result a
+			where a.is_virus is true
+				and not exists(select 1 from s_virus_platform b
+					where split_part(split_part(a.virus_name, '.', 1), '/', 2) = b.virus_platform
+					)
+		*/
+		), insert_s_virus_name as(
+			insert into s_virus_name(virus_name, ex_time)
+			select a.virus_name, a.r_time
+				from temp_s_final_result a
+			where a.is_virus is true
+				and not exists(select 1 from s_virus_name b
+					where a.virus_name = b.virus_name
+					)
+		), insert_s_cve_sample as(
+			insert into s_cve_sample(md5, crc32, virus_name, ex_time)
+			select a.md5, a.crc32, a.virus_name, a.r_time
+				from temp_s_final_result a
+			where a.is_virus is true
+				and upper(a.virus_name) like '%CVE-%'
+		), update_s_attention_num as(
+			update s_attention_num a set num = num + b.count, total_num = total_num + b.count
+			from select_count b
+			where upper(b.virus_name) like concat('%', upper(a.virus_name), '%')
+				and a.status = 1
+		), insert_s_auto_statistics as(
+			insert into s_auto_statistics(source_e_name, sample_num, danger_behavior_num, process_monitor_num,
+			file_monitor_num, register_monitor_num, network_monitor_num, other_behavior_num, r_time)
+			select source_e_name, count(1), 
+				sum(case when is_danger_behavior then 1 else 0 end),
+				sum(case when is_process_monitor then 1 else 0 end),
+				sum(case when is_file_monitor then 1 else 0 end),
+				sum(case when is_register_monitor then 1 else 0 end),
+				sum(case when is_network_monitor then 1 else 0 end),
+				sum(case when is_other_behavior then 1 else 0 end),
+				date_trunc('day', r_time)
+				from temp_s_final_result
+			where auto_from is not null
+			group by source_e_name, date_trunc('day', r_time)
+		)
+		update sys_record_table set record_id = dmaxid
+		where fun_name = 's_final_result';
+		
+	end if;
+
+	return 0;
+	exception when others then
+		RAISE EXCEPTION '(%)', SQLERRM;
+		return 1;
+end;
+$$;
+
+
+ALTER FUNCTION public.s_sample_statistics(i integer) OWNER TO postgres;
+
+--
+-- Name: attention_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE attention_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE attention_id_seq OWNER TO postgres;
+
+--
+-- Name: person_info; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW person_info AS
+ SELECT dblink.person_id,
+    dblink.person_name,
+    dblink.department_name,
+    dblink.state,
+    dblink.user_name,
+    dblink.user_password
+   FROM dblink('host=10.255.81.15 port=5432 user=postgres password=postgres dbname=authority'::text, '
+select a.person_id, a.person_name, b.department_name, a.state, 
+		c.user_name, c.user_password
+	from sys_person a, sys_department_information b, sys_login c
+where a.department_id = b.department_id
+	and a.person_id = c.person_id
+'::text) dblink(person_id integer, person_name character varying(20), department_name character varying(64), state character(1), user_name character varying(64), user_password character varying(64));
+
+
+ALTER TABLE person_info OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: s_action_domain; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_action_domain (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    domain text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_action_domain OWNER TO postgres;
+
+--
+-- Name: s_action_domain_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_action_domain_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_action_domain_id_seq OWNER TO postgres;
+
+--
+-- Name: s_action_domain_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_action_domain_id_seq OWNED BY s_action_domain.id;
+
+
+--
+-- Name: s_action_ip; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_action_ip (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    ip text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_action_ip OWNER TO postgres;
+
+--
+-- Name: s_action_ip_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_action_ip_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_action_ip_id_seq OWNER TO postgres;
+
+--
+-- Name: s_action_ip_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_action_ip_id_seq OWNED BY s_action_ip.id;
+
+
+--
+-- Name: s_action_url; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_action_url (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    url text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_action_url OWNER TO postgres;
+
+--
+-- Name: s_action_url_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_action_url_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_action_url_id_seq OWNER TO postgres;
+
+--
+-- Name: s_action_url_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_action_url_id_seq OWNED BY s_action_url.id;
+
+
+--
+-- Name: s_astats; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_astats (
+    jd_id integer NOT NULL,
+    jd_en character varying(128),
+    jd_cn character varying(128),
+    jd_ctime timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE s_astats OWNER TO postgres;
+
+--
+-- Name: s_astats_jd_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_astats_jd_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_astats_jd_id_seq OWNER TO postgres;
+
+--
+-- Name: s_astats_jd_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_astats_jd_id_seq OWNED BY s_astats.jd_id;
+
+
+--
+-- Name: s_attention_cve; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_attention_cve (
+    id integer DEFAULT nextval('attention_id_seq'::regclass) NOT NULL,
+    person_id integer,
+    cve_name character varying(256),
+    r_time timestamp without time zone DEFAULT now(),
+    state character(1)
+);
+
+
+ALTER TABLE s_attention_cve OWNER TO postgres;
+
+--
+-- Name: s_attention_cve_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_attention_cve_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_attention_cve_id_seq OWNER TO postgres;
+
+--
+-- Name: s_attention_cve_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_attention_cve_id_seq OWNED BY s_attention_cve.id;
+
+
+--
+-- Name: s_attention_num; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_attention_num (
+    person_id integer,
+    virus_name character varying(256),
+    num integer DEFAULT 0,
+    total_num integer DEFAULT 0,
+    status integer DEFAULT 1,
+    r_time timestamp without time zone DEFAULT now(),
+    id integer NOT NULL
+);
+
+
+ALTER TABLE s_attention_num OWNER TO postgres;
+
+--
+-- Name: s_attention_num_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_attention_num_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_attention_num_id_seq OWNER TO postgres;
+
+--
+-- Name: s_attention_num_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_attention_num_id_seq OWNED BY s_attention_num.id;
+
+
+--
+-- Name: s_auto_action; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_auto_action (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    action text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_auto_action OWNER TO postgres;
+
+--
+-- Name: s_auto_action_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_auto_action_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_auto_action_id_seq OWNER TO postgres;
+
+--
+-- Name: s_auto_action_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_auto_action_id_seq OWNED BY s_auto_action.id;
+
+
+--
+-- Name: s_auto_statistics; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_auto_statistics (
+    sample_num integer DEFAULT 0,
+    is_virus_num integer DEFAULT 0,
+    danger_behavior_num integer DEFAULT 0,
+    other_behavior_num integer,
+    process_monitor_num integer,
+    file_monitor_num integer,
+    register_monitor_num integer,
+    network_monitor_num integer,
+    r_time timestamp without time zone,
+    source_e_name character varying(128),
+    id integer NOT NULL
+);
+
+
+ALTER TABLE s_auto_statistics OWNER TO postgres;
+
+--
+-- Name: s_auto_statistics_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_auto_statistics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_auto_statistics_id_seq OWNER TO postgres;
+
+--
+-- Name: s_auto_statistics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_auto_statistics_id_seq OWNED BY s_auto_statistics.id;
+
+
+--
+-- Name: s_client_info; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_client_info (
+    id integer NOT NULL,
+    config text,
+    ip character varying(128),
+    port character varying(128),
+    max_num integer,
+    status character varying(1),
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_client_info OWNER TO postgres;
+
+--
+-- Name: s_client_info_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_client_info_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_client_info_id_seq OWNER TO postgres;
+
+--
+-- Name: s_client_info_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_client_info_id_seq OWNED BY s_client_info.id;
+
+
+--
+-- Name: s_cve_sample; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_cve_sample (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    virus_name character varying(256),
+    ex_time timestamp without time zone,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_cve_sample OWNER TO postgres;
+
+--
+-- Name: s_cve_sample_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_cve_sample_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_cve_sample_id_seq OWNER TO postgres;
+
+--
+-- Name: s_cve_sample_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_cve_sample_id_seq OWNED BY s_cve_sample.id;
+
+
+--
+-- Name: s_cve_total; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_cve_total (
+    id integer NOT NULL,
+    source_e_name character varying(32),
+    cve_name character varying(128),
+    sample_num integer,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_cve_total OWNER TO postgres;
+
+--
+-- Name: s_cve_total_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_cve_total_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_cve_total_id_seq OWNER TO postgres;
+
+--
+-- Name: s_cve_total_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_cve_total_id_seq OWNED BY s_cve_total.id;
+
+
+--
+-- Name: s_derivative_relation; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_derivative_relation (
+    md5 character varying(32) NOT NULL,
+    child_md5 character varying(32) NOT NULL,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_derivative_relation OWNER TO postgres;
+
+--
+-- Name: s_file_format_list; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_file_format_list (
+    id integer NOT NULL,
+    source_e_name character varying(64),
+    archive integer,
+    document integer,
+    picture integer,
+    script integer,
+    text integer,
+    binexecute integer,
+    media integer,
+    softdata integer,
+    other integer,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_file_format_list OWNER TO postgres;
+
+--
+-- Name: s_file_format_list_temp; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_file_format_list_temp (
+    id integer NOT NULL,
+    source_e_name character varying(32),
+    file_format character varying(128),
+    sample_num integer,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_file_format_list_temp OWNER TO postgres;
+
+--
+-- Name: s_file_format_list_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_file_format_list_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_file_format_list_id_seq OWNER TO postgres;
+
+--
+-- Name: s_file_format_list_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_file_format_list_id_seq OWNED BY s_file_format_list_temp.id;
+
+
+--
+-- Name: s_file_format_list_id_seq1; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_file_format_list_id_seq1
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_file_format_list_id_seq1 OWNER TO postgres;
+
+--
+-- Name: s_file_format_list_id_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_file_format_list_id_seq1 OWNED BY s_file_format_list.id;
+
+
+--
+-- Name: s_final_result; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_final_result (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    source_e_name character varying(30) DEFAULT 'avl'::character varying,
+    file_name character varying(128),
+    file_type character varying(64),
+    extension character varying(128),
+    size bigint,
+    first_time timestamp without time zone,
+    final_time timestamp without time zone,
+    ex_time timestamp without time zone,
+    final_result character varying(128),
+    virus_type character varying(128),
+    virus_from character varying(128),
+    virus_name character varying(256),
+    r_time timestamp without time zone DEFAULT now(),
+    is_virus boolean,
+    auto_first_time timestamp without time zone,
+    auto_end_time timestamp without time zone,
+    is_file_monitor boolean,
+    file_monitor_num integer,
+    is_danger_behavior boolean,
+    danger_behavior_num integer,
+    is_network_monitor boolean,
+    network_monitor_num integer,
+    is_process_monitor boolean,
+    process_monitor_num integer,
+    is_register_monitor boolean,
+    register_monitor_num integer,
+    is_other_behavior boolean,
+    other_behavior_num integer,
+    auto_from character varying(256),
+    is_derivative boolean
+);
+
+
+ALTER TABLE s_final_result OWNER TO postgres;
+
+--
+-- Name: s_final_result_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_final_result_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_final_result_id_seq OWNER TO postgres;
+
+--
+-- Name: s_final_result_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_final_result_id_seq OWNED BY s_final_result.id;
+
+
+--
+-- Name: s_final_result_person; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_final_result_person (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    source_e_name character varying(30),
+    file_name character varying(128),
+    file_type character varying(64),
+    extension character varying(128),
+    size bigint,
+    first_time timestamp without time zone,
+    final_time timestamp without time zone,
+    ex_time timestamp without time zone,
+    final_result character varying(128),
+    virus_type character varying(128),
+    virus_from character varying(128),
+    virus_name character varying(256),
+    r_time timestamp without time zone DEFAULT now(),
+    is_virus boolean,
+    auto_first_time timestamp without time zone,
+    auto_end_time timestamp without time zone,
+    is_file_monitor boolean,
+    file_monitor_num integer,
+    is_danger_behavior boolean,
+    danger_behavior_num integer,
+    is_network_monitor boolean,
+    network_monitor_num integer,
+    is_process_monitor boolean,
+    process_monitor_num integer,
+    is_register_monitor boolean,
+    register_monitor_num integer,
+    is_other_behavior boolean,
+    other_behavior_num integer,
+    auto_from character varying(256)
+);
+
+
+ALTER TABLE s_final_result_person OWNER TO postgres;
+
+--
+-- Name: s_final_result_person_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_final_result_person_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_final_result_person_id_seq OWNER TO postgres;
+
+--
+-- Name: s_final_result_person_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_final_result_person_id_seq OWNED BY s_final_result_person.id;
+
+
+--
+-- Name: s_gene_info; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_gene_info (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    gene text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_gene_info OWNER TO postgres;
+
+--
+-- Name: s_gene_info_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_gene_info_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_gene_info_id_seq OWNER TO postgres;
+
+--
+-- Name: s_gene_info_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_gene_info_id_seq OWNED BY s_gene_info.id;
+
+
+--
+-- Name: s_machine_result; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_machine_result (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    machine_name character varying(128),
+    status character varying(10),
+    virus_name character varying(256),
+    start_time timestamp without time zone,
+    end_time timestamp without time zone,
+    detectvm integer,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_machine_result OWNER TO postgres;
+
+--
+-- Name: s_machine_result_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_machine_result_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_machine_result_id_seq OWNER TO postgres;
+
+--
+-- Name: s_machine_result_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_machine_result_id_seq OWNED BY s_machine_result.id;
+
+
+--
+-- Name: s_multiscan_result; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_multiscan_result (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    cloud_analyzer character varying(256),
+    kingsoft character varying(256),
+    kk_executer character varying(256),
+    kk_analyzer character varying(256),
+    m character varying(256),
+    m_analyzer character varying(256),
+    kingsoftcloudd character varying(256),
+    filetype character varying(256),
+    avl3 character varying(256),
+    nsrl character varying(256),
+    email_analyzer character varying(256),
+    classify_analyzer character varying(256),
+    manual character varying(256),
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_multiscan_result OWNER TO postgres;
+
+
+--
+-- Name: s_multiscan_result_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_multiscan_result_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_multiscan_result_id_seq OWNER TO postgres;
+
+--
+-- Name: s_multiscan_result_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_multiscan_result_id_seq OWNED BY s_multiscan_result.id;
+
+
+--
+-- Name: s_sample_info; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_sample_info (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    source_e_name character varying(30),
+    first_time timestamp without time zone,
+    final_time timestamp without time zone,
+    num integer,
+    r_time timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE s_sample_info OWNER TO postgres;
+
+--
+-- Name: s_sample_repeat; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_sample_repeat (
+    id integer NOT NULL,
+    md5 character varying(32),
+    source_e_name character varying(30),
+    r_time timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE s_sample_repeat OWNER TO postgres;
+
+--
+-- Name: s_sample_repeat_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_sample_repeat_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_sample_repeat_id_seq OWNER TO postgres;
+
+--
+-- Name: s_sample_repeat_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_sample_repeat_id_seq OWNED BY s_sample_repeat.id;
+
+
+--
+-- Name: s_sample_uniq; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_sample_uniq (
+    id integer NOT NULL,
+    md5 character varying(32),
+    crc32 character varying(8),
+    sha1 character varying(40),
+    sha256 character varying(64),
+    size bigint,
+    file_type character varying(64),
+    source_e_name character varying(30),
+    r_time timestamp without time zone DEFAULT now(),
+    storage_path character varying(128)
+);
+
+
+ALTER TABLE s_sample_uniq OWNER TO postgres;
+
+
+--
+-- Name: s_sample_uniq_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_sample_uniq_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_sample_uniq_id_seq OWNER TO postgres;
+
+--
+-- Name: s_sample_uniq_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_sample_uniq_id_seq OWNED BY s_sample_uniq.id;
+
+
+--
+-- Name: s_samplesum_bysource; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_samplesum_bysource (
+    id integer NOT NULL,
+    sourcename character varying(256) NOT NULL,
+    sample_count integer,
+    trustsum integer,
+    notrustsum integer,
+    unknownsum integer,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_samplesum_bysource OWNER TO postgres;
+
+--
+-- Name: s_samplesum_bysource_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_samplesum_bysource_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_samplesum_bysource_id_seq OWNER TO postgres;
+
+--
+-- Name: s_samplesum_bysource_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_samplesum_bysource_id_seq OWNED BY s_samplesum_bysource.id;
+
+
+--
+-- Name: s_search_history; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_search_history (
+    id integer NOT NULL,
+    keyword character varying(128),
+    r_time timestamp without time zone
+);
+
+
+ALTER TABLE s_search_history OWNER TO postgres;
+
+--
+-- Name: s_search_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_search_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_search_history_id_seq OWNER TO postgres;
+
+--
+-- Name: s_search_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_search_history_id_seq OWNED BY s_search_history.id;
+
+
+--
+-- Name: s_source_list; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_source_list (
+    id integer NOT NULL,
+    source_e_name character varying(64),
+    sample_num integer,
+    uniq_num integer,
+    r_time timestamp without time zone
+);
+
+
+ALTER TABLE s_source_list OWNER TO postgres;
+
+--
+-- Name: s_source_list_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_source_list_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_source_list_id_seq OWNER TO postgres;
+
+--
+-- Name: s_source_list_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_source_list_id_seq OWNED BY s_source_list.id;
+
+
+--
+-- Name: s_sourcename; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_sourcename (
+    source_e_name character varying(30) NOT NULL,
+    source_c_name character varying(30),
+    status character varying(10),
+    set_option text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_sourcename OWNER TO postgres;
+
+--
+-- Name: s_upload; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_upload (
+    id integer NOT NULL,
+    md5 character varying(32),
+    filesize integer,
+    status integer,
+    virus_name character varying(256),
+    r_time timestamp without time zone DEFAULT now(),
+    file_name text,
+    person_id integer,
+    upload_status integer,
+    crc32 character varying(8),
+    filetype character varying(128)
+);
+
+
+ALTER TABLE s_upload OWNER TO postgres;
+
+--
+-- Name: s_upload_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_upload_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_upload_id_seq OWNER TO postgres;
+
+--
+-- Name: s_upload_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_upload_id_seq OWNED BY s_upload.id;
+
+
+--
+-- Name: s_uploadbag; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_uploadbag (
+    id integer NOT NULL,
+    person_id integer,
+    filename character varying(256),
+    samplesum integer,
+    successsum integer,
+    faildsum integer,
+    filesize integer,
+    failds text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_uploadbag OWNER TO postgres;
+
+--
+-- Name: s_uploadbag_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_uploadbag_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_uploadbag_id_seq OWNER TO postgres;
+
+--
+-- Name: s_uploadbag_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_uploadbag_id_seq OWNED BY s_uploadbag.id;
+
+
+--
+-- Name: s_virus_action; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_action (
+    id integer NOT NULL,
+    action_name character varying(256),
+    ex_time timestamp without time zone,
+    r_time timestamp without time zone DEFAULT now(),
+    action_info text,
+    action_c_name text
+);
+
+
+ALTER TABLE s_virus_action OWNER TO postgres;
+
+--
+-- Name: s_virus_action_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_action_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_action_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_action_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_action_id_seq OWNED BY s_virus_action.id;
+
+
+--
+-- Name: s_virus_cve; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_cve (
+    id integer NOT NULL,
+    cve_e_name character varying(256),
+    cve_c_name character varying(256),
+    cve_id character varying(64),
+    bugraq_id character varying(10),
+    cve_type character varying(128),
+    cve_software character varying(1024),
+    cve_level character varying(128),
+    earliset_time text,
+    cve_reason text,
+    cve_harm text,
+    is_cve_code text,
+    cve_active text,
+    cve_security text,
+    is_cve_check text,
+    cve_trade_relation text,
+    cve_info_source text,
+    cve_release_scope text,
+    cve_info text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_virus_cve OWNER TO postgres;
+
+--
+-- Name: s_virus_cve_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_cve_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_cve_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_cve_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_cve_id_seq OWNED BY s_virus_cve.id;
+
+
+--
+-- Name: s_virus_family; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_family (
+    id integer NOT NULL,
+    virus_family character varying(256),
+    ex_time timestamp without time zone,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_virus_family OWNER TO postgres;
+
+--
+-- Name: s_virus_family_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_family_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_family_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_family_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_family_id_seq OWNED BY s_virus_family.id;
+
+
+--
+-- Name: s_virus_family_list; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_family_list (
+    id integer NOT NULL,
+    source_e_name character varying(64),
+    virus_family character varying(256),
+    sample_num integer,
+    r_time timestamp without time zone
+);
+
+
+ALTER TABLE s_virus_family_list OWNER TO postgres;
+
+--
+-- Name: s_virus_family_list_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_family_list_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_family_list_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_family_list_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_family_list_id_seq OWNED BY s_virus_family_list.id;
+
+
+--
+-- Name: s_virus_name; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_name (
+    id integer NOT NULL,
+    virus_name character varying(256),
+    ex_time timestamp without time zone,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE s_virus_name OWNER TO postgres;
+
+--
+-- Name: s_virus_name_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_name_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_name_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_name_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_name_id_seq OWNED BY s_virus_name.id;
+
+
+--
+-- Name: s_virus_name_list; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_name_list (
+    id integer NOT NULL,
+    source_e_name character varying(64),
+    virus_name character varying(256),
+    sample_num integer,
+    r_time timestamp without time zone
+);
+
+
+ALTER TABLE s_virus_name_list OWNER TO postgres;
+
+--
+-- Name: s_virus_name_list_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_name_list_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_name_list_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_name_list_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_name_list_id_seq OWNED BY s_virus_name_list.id;
+
+
+--
+-- Name: s_virus_platform; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_platform (
+    id integer NOT NULL,
+    virus_platform character varying(32),
+    ex_time timestamp without time zone,
+    r_time timestamp without time zone DEFAULT now(),
+    c_info text,
+    e_info text
+);
+
+
+ALTER TABLE s_virus_platform OWNER TO postgres;
+
+--
+-- Name: s_virus_platform_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_platform_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_platform_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_platform_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_platform_id_seq OWNED BY s_virus_platform.id;
+
+
+--
+-- Name: s_virus_type; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_type (
+    id integer NOT NULL,
+    virus_type character varying(32),
+    virus_type_c_name character varying(32),
+    virus_type_e_tranlate character varying(32),
+    virus_type_c_tranlate character varying(32),
+    r_time timestamp without time zone DEFAULT now(),
+    type_info text,
+    danger_level character varying(16)
+);
+
+
+ALTER TABLE s_virus_type OWNER TO postgres;
+
+--
+-- Name: s_virus_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_type_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_type_id_seq OWNED BY s_virus_type.id;
+
+
+--
+-- Name: s_virus_type_list; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_type_list (
+    id integer NOT NULL,
+    hack integer,
+    troj integer,
+    worm integer,
+    virus integer,
+    riskware integer,
+    spyware integer,
+    exploit integer,
+    junkfile integer,
+    testfile integer,
+    unknown integer,
+    heur integer,
+    r_time timestamp without time zone DEFAULT now(),
+    source_e_name character varying(64)
+);
+
+
+ALTER TABLE s_virus_type_list OWNER TO postgres;
+
+--
+-- Name: s_virus_type_list_temp; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE s_virus_type_list_temp (
+    id integer NOT NULL,
+    source_e_name character varying(64),
+    virus_type character varying(32),
+    sample_num integer,
+    r_time timestamp without time zone
+);
+
+
+ALTER TABLE s_virus_type_list_temp OWNER TO postgres;
+
+--
+-- Name: s_virus_type_list_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_type_list_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_type_list_id_seq OWNER TO postgres;
+
+--
+-- Name: s_virus_type_list_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_type_list_id_seq OWNED BY s_virus_type_list_temp.id;
+
+
+--
+-- Name: s_virus_type_list_id_seq1; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE s_virus_type_list_id_seq1
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE s_virus_type_list_id_seq1 OWNER TO postgres;
+
+--
+-- Name: s_virus_type_list_id_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE s_virus_type_list_id_seq1 OWNED BY s_virus_type_list.id;
+
+
+--
+-- Name: sys_check_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE sys_check_table (
+    tablename character varying(40),
+    rowname character varying(40),
+    state character(1) DEFAULT '0'::bpchar,
+    tablespacename character varying(40)
+);
+
+
+ALTER TABLE sys_check_table OWNER TO postgres;
+
+INSERT INTO sys_check_table(
+            tablename, rowname, state)
+    VALUES ('s_sample_repeat', 'r_time','1'),('s_sample_uniq', 'r_time', '1'),('s_multiscan_result', 'r_time', '1'),('s_final_result', 'r_time','1');
+
+--
+-- Name: sys_record_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE sys_record_table (
+    fun_name character varying(30),
+    record_id integer,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE sys_record_table OWNER TO postgres;
+
+
+INSERT INTO sys_record_table(
+            fun_name, record_id, r_time)
+    VALUES ('s_final_result',0,now()),
+	('s_sample_repeat',0,now()),
+	('s_sample_uniq',0,now()),
+	('shadow_upload',0,now())
+;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_action_domain ALTER COLUMN id SET DEFAULT nextval('s_action_domain_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_action_ip ALTER COLUMN id SET DEFAULT nextval('s_action_ip_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_action_url ALTER COLUMN id SET DEFAULT nextval('s_action_url_id_seq'::regclass);
+
+
+--
+-- Name: jd_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_astats ALTER COLUMN jd_id SET DEFAULT nextval('s_astats_jd_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_attention_num ALTER COLUMN id SET DEFAULT nextval('s_attention_num_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_auto_action ALTER COLUMN id SET DEFAULT nextval('s_auto_action_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_auto_statistics ALTER COLUMN id SET DEFAULT nextval('s_auto_statistics_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_client_info ALTER COLUMN id SET DEFAULT nextval('s_client_info_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_cve_sample ALTER COLUMN id SET DEFAULT nextval('s_cve_sample_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_cve_total ALTER COLUMN id SET DEFAULT nextval('s_cve_total_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_file_format_list ALTER COLUMN id SET DEFAULT nextval('s_file_format_list_id_seq1'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_file_format_list_temp ALTER COLUMN id SET DEFAULT nextval('s_file_format_list_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_final_result ALTER COLUMN id SET DEFAULT nextval('s_final_result_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_final_result_person ALTER COLUMN id SET DEFAULT nextval('s_final_result_person_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_gene_info ALTER COLUMN id SET DEFAULT nextval('s_gene_info_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_machine_result ALTER COLUMN id SET DEFAULT nextval('s_machine_result_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_multiscan_result ALTER COLUMN id SET DEFAULT nextval('s_multiscan_result_id_seq'::regclass);
+
+
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_sample_repeat ALTER COLUMN id SET DEFAULT nextval('s_sample_repeat_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_sample_uniq ALTER COLUMN id SET DEFAULT nextval('s_sample_uniq_id_seq'::regclass);
+
+
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_samplesum_bysource ALTER COLUMN id SET DEFAULT nextval('s_samplesum_bysource_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_search_history ALTER COLUMN id SET DEFAULT nextval('s_search_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_source_list ALTER COLUMN id SET DEFAULT nextval('s_source_list_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_upload ALTER COLUMN id SET DEFAULT nextval('s_upload_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_uploadbag ALTER COLUMN id SET DEFAULT nextval('s_uploadbag_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_action ALTER COLUMN id SET DEFAULT nextval('s_virus_action_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_cve ALTER COLUMN id SET DEFAULT nextval('s_virus_cve_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_family ALTER COLUMN id SET DEFAULT nextval('s_virus_family_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_family_list ALTER COLUMN id SET DEFAULT nextval('s_virus_family_list_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_name ALTER COLUMN id SET DEFAULT nextval('s_virus_name_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_name_list ALTER COLUMN id SET DEFAULT nextval('s_virus_name_list_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_platform ALTER COLUMN id SET DEFAULT nextval('s_virus_platform_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_type ALTER COLUMN id SET DEFAULT nextval('s_virus_type_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_type_list ALTER COLUMN id SET DEFAULT nextval('s_virus_type_list_id_seq1'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY s_virus_type_list_temp ALTER COLUMN id SET DEFAULT nextval('s_virus_type_list_id_seq'::regclass);
+
+
+--
+-- Name: PK15; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_type
+    ADD CONSTRAINT "PK15" PRIMARY KEY (id);
+
+
+--
+-- Name: PK16; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_family
+    ADD CONSTRAINT "PK16" PRIMARY KEY (id);
+
+
+--
+-- Name: PK17; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_platform
+    ADD CONSTRAINT "PK17" PRIMARY KEY (id);
+
+
+--
+-- Name: PK18; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_name
+    ADD CONSTRAINT "PK18" PRIMARY KEY (id);
+
+
+--
+-- Name: PK18_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_action
+    ADD CONSTRAINT "PK18_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK18_1_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_cve
+    ADD CONSTRAINT "PK18_1_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK1_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_sample_uniq
+    ADD CONSTRAINT "PK1_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK1_2; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_sample_info
+    ADD CONSTRAINT "PK1_2" PRIMARY KEY (id);
+
+
+--
+-- Name: PK22_1_1_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_samplesum_bysource
+    ADD CONSTRAINT "PK22_1_1_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK3; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_source_list
+    ADD CONSTRAINT "PK3" PRIMARY KEY (id);
+
+
+--
+-- Name: PK37; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_type_list_temp
+    ADD CONSTRAINT "PK37" PRIMARY KEY (id);
+
+
+--
+-- Name: PK37_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_family_list
+    ADD CONSTRAINT "PK37_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK37_1_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_name_list
+    ADD CONSTRAINT "PK37_1_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK38_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_cve_total
+    ADD CONSTRAINT "PK38_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK5_1_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_auto_action
+    ADD CONSTRAINT "PK5_1_1" PRIMARY KEY (id);
+
+
+--
+-- Name: PK_id_searchHistory; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_search_history
+    ADD CONSTRAINT "PK_id_searchHistory" PRIMARY KEY (id);
+
+
+--
+-- Name: PK_upload; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_upload
+    ADD CONSTRAINT "PK_upload" PRIMARY KEY (id);
+
+
+--
+-- Name: PK_uploadbag_id; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_uploadbag
+    ADD CONSTRAINT "PK_uploadbag_id" PRIMARY KEY (id);
+
+
+--
+-- Name: PK_vsm_log_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_sourcename
+    ADD CONSTRAINT "PK_vsm_log_1" PRIMARY KEY (source_e_name);
+
+
+--
+-- Name: s_auto_statistics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_auto_statistics
+    ADD CONSTRAINT s_auto_statistics_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: s_file_format_list_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_file_format_list
+    ADD CONSTRAINT s_file_format_list_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: s_virus_type_list_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY s_virus_type_list
+    ADD CONSTRAINT s_virus_type_list_pkey PRIMARY KEY (id);
+
+--
+-- Name: trigger_attention_virus; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trigger_attention_virus AFTER INSERT OR DELETE OR UPDATE ON s_attention_cve FOR EACH ROW EXECUTE PROCEDURE attention_virus();
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+--
+-- Name: fun_check_table(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+drop function if exists  fun_check_table();
+
+CREATE FUNCTION fun_check_table() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+    sqlexec varchar(2000);  --语句变量
+    v_date1 varchar(8);    --创建分区的开始时间
+    v_date2 varchar(8);    --创建分区的结束时间
+    r record;
+    t record;
+    f record;
+    l_str varchar(2000);      --字符串连接变量
+    BEGIN
+    --获取分区规则开始、结束时间
+    select to_char(date_trunc('month', CURRENT_DATE + interval '0 month'),'YYYYMMDD') into v_date1;
+    select to_char(date_trunc('month', CURRENT_DATE + interval '1 month'),'YYYYMMDD') into v_date2;
+    --根据现有表建立分区、字段、表空间
+    for r in (select * from sys_check_table where state = '1') loop
+	--判断是否有新的分区
+	if r.tablespacename is not null and r.tablespacename!='' then 
+	--在新的磁盘创建分区表
+	sqlexec = 'CREATE TABLE '||r.tablename||''||v_date1||' (CONSTRAINT '||r.tablename||''||v_date1||'_time_check CHECK ('||r.rowname||' >= '''||v_date1||''' 
+		AND '||r.rowname||' < '''||v_date2||''')) INHERITS ('||r.tablename||') WITH (OIDS=FALSE) TABLESPACE '||r.tablespacename||'; 
+		ALTER TABLE '||r.tablename||''||v_date1||' OWNER TO postgres;'; 
+	--没有新的分区
+	else 
+	--在原有磁盘创建分区表
+	sqlexec = 'CREATE TABLE '||r.tablename||''||v_date1||' (CONSTRAINT '||r.tablename||''||v_date1||'_time_check CHECK ('||r.rowname||' >= '''||v_date1||''' 
+		  AND '||r.rowname||' < '''||v_date2||''')) INHERITS ('||r.tablename||') WITH (OIDS=FALSE); 
+		  ALTER TABLE '||r.tablename||''||v_date1||' OWNER TO postgres;';
+	end if;
+	--执行
+	--RAISE notice '(%)', sqlexec;
+	EXECUTE sqlexec;
+	--RAISE EXCEPTION 'c_sqlexec: %', sqlexec; 
+
+	--添加分区表主键
+	
+	sqlexec = 'SELECT column_name as column_names FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME='''||r.tablename||''' and 1=1;';
+	l_str := '';
+	for f in EXECUTE sqlexec loop
+		l_str = l_str||f.column_names||',';
+	end loop;
+	if l_str != '' then
+		l_str = rtrim(l_str,',');
+		sqlexec = 'alter table '||r.tablename||''||v_date1||' add primary key ('||l_str||');';
+		--RAISE notice '(%)', sqlexec;
+		--EXECUTE sqlexec;
+		
+	end if;
+	
+	
+	--取得当前分区表字段名称
+	sqlexec = 'SELECT a.attname  FROM pg_class as c,pg_attribute as a where c.relname = '''||r.tablename||''' and a.attrelid = c.oid and a.attnum > 0 and a.attname not like  ''%.%'';';
+	l_str := '';
+	--RAISE notice '(%)', d_sqlexec;
+	for t in EXECUTE sqlexec loop
+		l_str = l_str||'new.'||t.attname||',';
+	end loop;
+	--去掉字符串右侧符号
+	l_str = rtrim(l_str,',');
+	--在对应分区表上建立规则
+	sqlexec = 'CREATE RULE '||r.tablename||''||v_date1||' AS ON INSERT TO '||r.tablename||' WHERE ('||r.rowname||' >= '' '||v_date1||' '' AND '||r.rowname||' < '''||v_date2||''') 
+	DO INSTEAD INSERT INTO '||r.tablename||''||v_date1||' VALUES ('||l_str||');';
+	--执行
+	--RAISE notice '(%)', sqlexec;
+	EXECUTE sqlexec;
+    end loop;
+    return 0;
+	exception when others then
+	RAISE EXCEPTION '(%)', SQLERRM;
+        return 1;
+   END;
+   $$;
+
+
+ALTER FUNCTION public.fun_check_table() OWNER TO postgres;
+
+select fun_check_table();
+
+--
+-- Name: fun_check_table(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+drop function if exists  fun_check_table();
+
+CREATE FUNCTION fun_check_table() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+    sqlexec varchar(2000);  --语句变量
+    v_date1 varchar(8);    --创建分区的开始时间
+    v_date2 varchar(8);    --创建分区的结束时间
+    r record;
+    t record;
+    f record;
+    l_str varchar(2000);      --字符串连接变量
+    BEGIN
+    --获取分区规则开始、结束时间
+    select to_char(date_trunc('month', CURRENT_DATE + interval '1 month'),'YYYYMMDD') into v_date1;
+    select to_char(date_trunc('month', CURRENT_DATE + interval '2 month'),'YYYYMMDD') into v_date2;
+    --根据现有表建立分区、字段、表空间
+    for r in (select * from sys_check_table where state = '1') loop
+	--判断是否有新的分区
+	if r.tablespacename is not null and r.tablespacename!='' then 
+	--在新的磁盘创建分区表
+	sqlexec = 'CREATE TABLE '||r.tablename||''||v_date1||' (CONSTRAINT '||r.tablename||''||v_date1||'_time_check CHECK ('||r.rowname||' >= '''||v_date1||''' 
+		AND '||r.rowname||' < '''||v_date2||''')) INHERITS ('||r.tablename||') WITH (OIDS=FALSE) TABLESPACE '||r.tablespacename||'; 
+		ALTER TABLE '||r.tablename||''||v_date1||' OWNER TO postgres;'; 
+	--没有新的分区
+	else 
+	--在原有磁盘创建分区表
+	sqlexec = 'CREATE TABLE '||r.tablename||''||v_date1||' (CONSTRAINT '||r.tablename||''||v_date1||'_time_check CHECK ('||r.rowname||' >= '''||v_date1||''' 
+		  AND '||r.rowname||' < '''||v_date2||''')) INHERITS ('||r.tablename||') WITH (OIDS=FALSE); 
+		  ALTER TABLE '||r.tablename||''||v_date1||' OWNER TO postgres;';
+	end if;
+	--执行
+	--RAISE notice '(%)', sqlexec;
+	EXECUTE sqlexec;
+	--RAISE EXCEPTION 'c_sqlexec: %', sqlexec; 
+
+	--添加分区表主键
+	
+	sqlexec = 'SELECT column_name as column_names FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME='''||r.tablename||''' and 1=1;';
+	l_str := '';
+	for f in EXECUTE sqlexec loop
+		l_str = l_str||f.column_names||',';
+	end loop;
+	if l_str != '' then
+		l_str = rtrim(l_str,',');
+		sqlexec = 'alter table '||r.tablename||''||v_date1||' add primary key ('||l_str||');';
+		--RAISE notice '(%)', sqlexec;
+		--EXECUTE sqlexec;
+		
+	end if;
+	
+	
+	--取得当前分区表字段名称
+	sqlexec = 'SELECT a.attname  FROM pg_class as c,pg_attribute as a where c.relname = '''||r.tablename||''' and a.attrelid = c.oid and a.attnum > 0 and a.attname not like  ''%.%'';';
+	l_str := '';
+	--RAISE notice '(%)', d_sqlexec;
+	for t in EXECUTE sqlexec loop
+		l_str = l_str||'new.'||t.attname||',';
+	end loop;
+	--去掉字符串右侧符号
+	l_str = rtrim(l_str,',');
+	--在对应分区表上建立规则
+	sqlexec = 'CREATE RULE '||r.tablename||''||v_date1||' AS ON INSERT TO '||r.tablename||' WHERE ('||r.rowname||' >= '' '||v_date1||' '' AND '||r.rowname||' < '''||v_date2||''') 
+	DO INSTEAD INSERT INTO '||r.tablename||''||v_date1||' VALUES ('||l_str||');';
+	--执行
+	--RAISE notice '(%)', sqlexec;
+	EXECUTE sqlexec;
+    end loop;
+    return 0;
+	exception when others then
+	RAISE EXCEPTION '(%)', SQLERRM;
+        return 1;
+   END;
+   $$;
+
+
+ALTER FUNCTION public.fun_check_table() OWNER TO postgres;
+
+select fun_check_table();

@@ -1,0 +1,13 @@
+import psycopg2.extras
+import psycopg2 as pg
+cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+cur.excute(select )
+
+cur.close()
+conn.close()
+
+
+cur.fetchall()
+
+cur.fetchone()

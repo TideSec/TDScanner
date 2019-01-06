@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel = "stylesheet" type = "text/css" href = "/static/css/style.css">
+    <link rel = "stylesheet" type = "text/css" href = "/static/css/bootstrap.css">
+    <link rel = "stylesheet" href = "/static/css/font-awesome.css">
+    <link rel = "stylesheet" type = "text/css" href = "/static/css/style.css">    
+    <link rel = "stylesheet" href = "/static/css/animate.css">
+    <style type="text/css">
+        #reset_pw{
+            height: 275px;
+            padding-right: 0px !important;
+            position: fixed;
+            top: 50%;
+            left: 55%;
+            z-index: 1050;
+            width: 420px;
+            margin: -250px 0 0 -280px;
+            background-color: #ffffff;
+            border: 1px solid #999;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            -webkit-border-radius: 6px;
+            -moz-border-radius: 6px;
+            border-radius: 6px;
+            -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+            -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+            -webkit-background-clip: padding-box;
+            -moz-background-clip: padding-box;
+            background-clip: padding-box;
+        }
+        #reset_pw > .modal-header{
+            height: 45px;
+            background-color: #66afe9 !important;
+        }
+        #reset_pw > .modal-header >h4{
+            margin-top: 0px;
+        }
+        #reset_pw > .modal-body{
+            height: 175px;
+        }
+        #reset_pw > .modal-body > div{
+            margin-left: 30px;
+        }
+        #reset_pw > .modal-body > div > label{
+            width: 100% !important;
+            font-weight: normal;
+            font-family: Microsoft Yahei;
+        }
+        #lab{
+            font-size: 14px;
+            display: block;
+        }
+        #pw_old #pw_new #pw_again{
+            margin-bottom: 5px;
+        }
+        #reset_pw > div > .modal-header {
+            padding: 9px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        #reset_pw > div > .modal-body{
+            overflow-y: auto;
+            max-height: 400px;
+            padding: 15px;
+        }
+        #nav_search{
+            height: 45px !important;
+        }
+        .hide{
+            display: none;
+        }
+        .nav > li{
+            position: relative;
+            display: inline-flex;
+        }
+        #login_info{
+            margin-top: 4px !important;
+        }
+        #login_info ul{
+            margin-left: -130px !important;
+            margin-right: 20px !important;
+        }
+        #exit{
+            margin-left: 5px;
+            margin-right: 20px;
+        }
+        #exit ul{
+            margin-left: -165px !important;
+        }
+        #search_btn{
+            font-size: 18px !important;
+            margin-left: 3px !important;
+            color: white;
+            padding: 10px 0px 7px !important;
+        }
+        #search_text{
+            margin-left: 40px !important;
+            margin-top: 6px !important;
+            height: 25px !important;
+            color: black !important;
+        }
+        #nav_search_box{
+            width: 180px !important;
+        }
+        #pw_submit{
+            padding:2px 10px !important;
+        }
+        #pw_cancel{
+            padding:2px 10px !important;
+        }
+    </style>
+</head>
+<body >
+     <!--导航栏-->
+    <nav class="navbar navbar-default navbar-fixed-top nav-header nav-menu-font" role="navigation" position="fixed">
+        <!--导航栏标题-->
+        <div class="navbar-header">
+            <a class="navbar-brand nav-font" href="/" onfocus="blur()">样本人工投放</a>
+        </div>
+
+        <!--导航栏按钮-->
+        <div id="nav_menu">
+            <ul class="nav navbar-nav">
+                <li  class="navbar-nav {% block index %}{% endblock %}" id="index">
+                    <a href="/index" target="_self">首&nbsp页</a>
+                </li>
+                <li class="navbar-nav {% block history_result %}{% endblock %}" id="history_result">
+                    <a href="/history_record" target="_self">常规分析记录</a>
+                </li>
+                <li class="navbar-nav {% block sample_breeding %}{% endblock %}" id="sample_breeding">
+                    <a href="/breed_track" target="_self">养殖追踪</a>
+                </li>
+            </ul>
+        </div>
+        <div id="nav_search"></div>
+    </nav>
+    <div style="min-height:700px">
+    {% block content %}
+    {% endblock %} 
+    </div>
+
+    <!-- <footer style="height:40px;background-color:#66afe9;"></footer> -->
+    </body>
+    
+    <script type = "text/javascript" src="/static/js/jquery-2.0.3.min.js"> </script>
+    <script type = "text/javascript" src="/static/js/bootstrap.js"></script>
+    <script type = "text/javascript" src = "/static/js/uploadr.js"></script>
+    <script type = "text/javascript" src = "/static/js/mytable.js"></script>
+    <script type = "text/javascript" src="/static/js/sample_breeding.js"></script>
+    <script type = "text/javascript" src = "/static/js/history_list.js"></script>
+    <script type="text/javascript" src="/static/js/sso.js"></script>
+    <script type="text/javascript" src="/static/js/page.js"></script>
+    <script type="text/javascript">
+
+    </script>
+</html>

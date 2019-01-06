@@ -1,0 +1,556 @@
+时间：2015-10-20 14:30:54,785 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 14:30:54,786 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-20 16:02:25,467 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 16:02:25,468 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 10:01:02,435 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 10:01:02,435 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 10:01:55,370 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 10:01:55,370 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 17:48:17,108 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 17:48:17,109 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:15:01,258 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:15:01,259 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:16:37,760 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:16:37,761 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:19,010 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:19,010 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:20,086 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:20,087 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:21,398 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:21,399 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:22,087 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:22,087 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:22,595 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:22,596 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:23,309 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:23,309 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:23,733 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:23,733 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:24,453 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:24,453 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:24,995 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:24,995 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:25,722 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:25,723 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:26,202 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:26,203 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:26,786 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:26,787 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:27,269 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:27,269 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:28,286 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:28,286 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:28,674 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:28,675 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:29,338 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:29,339 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:29,763 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:29,764 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:30,394 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:30,395 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:23:30,806 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:23:30,807 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:43,416 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:43,417 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:43,859 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:43,860 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:44,391 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:44,392 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:44,792 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:44,792 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:45,018 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:45,018 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:45,200 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:45,200 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:45,704 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:45,705 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:45,892 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:45,893 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:46,059 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:46,059 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:46,369 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:46,369 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:46,872 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:46,873 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:47,024 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:47,024 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:47,178 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:47,179 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:47,324 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:47,325 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:47,857 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:47,858 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:48,011 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:48,011 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:48,956 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:49,023 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:49,241 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:49,242 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:49,672 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:49,673 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:50,153 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:50,153 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:50,538 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:50,539 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:51,025 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:51,026 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:51,492 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:51,493 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:51,901 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:51,902 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:52,322 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:52,323 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:52,755 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:52,756 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:53,009 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:53,010 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:53,508 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:53,508 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:55,871 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:55,872 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:57,059 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:57,060 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:58,349 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:58,349 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:26:59,412 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:26:59,413 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:28:31,470 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:28:31,471 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:28:31,905 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:28:31,905 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:28:32,339 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:28:32,339 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:28:32,756 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:28:32,756 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:28:32,967 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:28:32,968 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:28:33,192 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:28:33,192 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:28:33,399 文件：breed_track.py 行数：122 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "172.1.16.201" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:28:33,399 文件：breed_track.py 行数：131 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-23 15:35:38,672 文件：breed_track.py 行数：133 - ERROR: 错误:  语法错误 在 "down" 或附近的
+LINE 29:                     order by t1.file_name down 
+                                                   ^
+
+时间：2015-10-23 15:36:01,778 文件：breed_track.py 行数：133 - ERROR: 错误:  语法错误 在 "down" 或附近的
+LINE 29:                     order by t1.file_name down 
+                                                   ^
+
+时间：2015-10-23 15:37:10,649 文件：breed_track.py 行数：133 - ERROR: 错误:  语法错误 在 "down" 或附近的
+LINE 29:                     order by t1.file_name down 
+                                                   ^
+
+时间：2015-10-23 15:37:36,191 文件：breed_track.py 行数：133 - ERROR: 错误:  语法错误 在 "down" 或附近的
+LINE 29:                     order by t1.file_name down 
+                                                   ^
+
+时间：2015-10-24 10:04:43,183 文件：breed_track.py 行数：134 - ERROR: 错误:  字段 "hash" 不存在
+LINE 26:                         or hash like '%%' 
+                                    ^
+
+时间：2015-10-24 10:04:48,633 文件：breed_track.py 行数：134 - ERROR: 错误:  字段 "hash" 不存在
+LINE 26:                         or hash like '%%' 
+                                    ^
+
+时间：2015-10-24 10:05:33,537 文件：breed_track.py 行数：134 - ERROR: 错误:  字段 "hash" 不存在
+LINE 26:                         or hash like '%%' 
+                                    ^
+
+时间：2015-10-24 10:05:36,782 文件：breed_track.py 行数：134 - ERROR: 错误:  字段 "hash" 不存在
+LINE 26:                         or hash like '%%' 
+                                    ^
+
+时间：2015-10-24 10:05:40,256 文件：breed_track.py 行数：134 - ERROR: 错误:  字段 "hash" 不存在
+LINE 26:                         or hash like '%%' 
+                                    ^
+

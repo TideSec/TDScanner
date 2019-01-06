@@ -1,0 +1,497 @@
+#coding:utf-8
+
+from flask import Blueprint, g, request, render_template
+import psycopg2
+import psycopg2.extras
+import config
+import json
+import os 
+import random
+import sys
+import urllib
+import urllib2
+import urllib3
+import hash_uri_mapping
+import time
+import requests
+
+app = Blueprint("upload", __name__)
+
+# 预处理查询sql语句
+SingleCheckSql ="""
+SELECT
+  case when (avpscan     is null  or  avpscan ='') then 0 else 1 end +
+  case when (mcascan     is null  or  mcascan ='') then 0 else 1 end +
+  case when (navscan     is null  or  navscan ='') then 0 else 1 end +
+  case when (kvscan      is null  or  kvscan  ='') then 0 else 1 end +
+  case when (kavscan     is null  or  kavscan ='') then 0 else 1 end +
+  case when (ravscan     is null  or  ravscan ='') then 0 else 1 end +
+  case when (msescan     is null  or  msescan ='') then 0 else 1 end +
+  case when (bdpscan     is null  or  bdpscan ='') then 0 else 1 end +
+  case when (atvscan     is null  or  atvscan ='') then 0 else 1 end +
+  case when (drwscan     is null  or  drwscan ='') then 0 else 1 end +
+  case when (nodscan     is null  or  nodscan ='') then 0 else 1 end +
+  case when (clmscan     is null  or  clmscan ='') then 0 else 1 end +
+  case when (sohscan     is null  or  sohscan ='') then 0 else 1 end +
+  case when (nvcscan     is null  or  nvcscan ='') then 0 else 1 end +
+  case when (clvscan     is null  or  clvscan ='') then 0 else 1 end +
+  case when (vcdscan     is null  or  vcdscan ='') then 0 else 1 end +
+  case when (avascan     is null  or  avascan ='') then 0 else 1 end +
+  case when (ftnscan     is null  or  ftnscan ='') then 0 else 1 end +
+  case when (vcsscan     is null  or  vcsscan ='') then 0 else 1 end +
+  case when (pccscan     is null  or  pccscan ='') then 0 else 1 end +
+  case when (savscan     is null  or  savscan ='') then 0 else 1 end +
+  case when (avlscan     is null  or  avlscan ='') then 0 else 1 end
+  ||'/'||
+  case when (avpscan     is null or avpscan  ='Not Found' or  avpscan ='') then 0 else 1 end +
+  case when (mcascan     is null or mcascan  ='Not Found' or  mcascan ='') then 0 else 1 end +
+  case when (navscan     is null or navscan  ='Not Found' or  navscan ='') then 0 else 1 end +
+  case when (kvscan      is null or kvscan   ='Not Found' or  kvscan  ='') then 0 else 1 end +
+  case when (kavscan     is null or kavscan  ='Not Found' or  kavscan ='') then 0 else 1 end +
+  case when (ravscan     is null or ravscan  ='Not Found' or  ravscan ='') then 0 else 1 end +
+  case when (msescan     is null or msescan  ='Not Found' or  msescan ='') then 0 else 1 end +
+  case when (bdpscan     is null or bdpscan  ='Not Found' or  bdpscan ='') then 0 else 1 end +
+  case when (atvscan     is null or atvscan  ='Not Found' or  atvscan ='') then 0 else 1 end +
+  case when (drwscan     is null or drwscan  ='Not Found' or  drwscan ='') then 0 else 1 end +
+  case when (nodscan     is null or nodscan  ='Not Found' or  nodscan ='') then 0 else 1 end +
+  case when (clmscan     is null or clmscan  ='Not Found' or  clmscan ='') then 0 else 1 end +
+  case when (sohscan     is null or sohscan  ='Not Found' or  sohscan ='') then 0 else 1 end +
+  case when (nvcscan     is null or nvcscan  ='Not Found' or  nvcscan ='') then 0 else 1 end +
+  case when (clvscan     is null or clvscan  ='Not Found' or  clvscan ='') then 0 else 1 end +
+  case when (vcdscan     is null or vcdscan  ='Not Found' or  vcdscan ='') then 0 else 1 end +
+  case when (avascan     is null or avascan  ='Not Found' or  avascan ='') then 0 else 1 end +
+  case when (ftnscan     is null or ftnscan  ='Not Found' or  ftnscan ='') then 0 else 1 end +
+  case when (vcsscan     is null or vcsscan  ='Not Found' or  vcsscan ='') then 0 else 1 end +
+  case when (pccscan     is null or pccscan  ='Not Found' or  pccscan ='') then 0 else 1 end +
+  case when (savscan     is null or savscan  ='Not Found' or  savscan ='') then 0 else 1 end +
+  case when (avlscan     is null or avlscan  ='Not Found' or  avlscan ='') then 0 else 1 end as check_num
+  FROM t_multiscan_scan_result
+  where batch_id = %(batch_id)s
+"""
+# 单样本动态查询语言
+SingleAutoSql = """
+    SELECT c.MD5 ,
+        CASE WHEN a.md5 IS NOT NULL THEN '原始文件' ELSE '衍生文件' END is_ori ,
+        CASE WHEN a.md5 IS NOT NULL THEN 1 ELSE 0 END is_ori_stat ,
+        b.batch_id,
+        c.is_virus,c.virus_name,
+        is_danger_behavior, is_other_behavior,
+        is_network_monitor,  is_process_monitor,
+        is_file_monitor,  is_register_monitor
+    from t_final_cp c
+    full join t_user_operat_info A
+    on a.md5 = c.md5 and a.batch_id = c.batch_id
+    full join t_auto_analysis_cp  B
+    on b.md5 = c.md5 and c.batch_id = b.batch_id
+    where b.batch_id =%(batch_id)s
+    order by is_ori_stat desc;
+"""
+
+# 记录日志
+checkSampleLog = config.initLogger(config.check_sample_path)
+uploadSingleLog = config.initLogger(config.single_sample_path)
+breedLog = config.initLogger(config.breed_log_path)
+
+@app.before_request
+def before_request():
+  g.db_breed = psycopg2.connect(config.db_connect_breed)
+  g.cur_breed = g.db_breed.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+  g.db = psycopg2.connect(config.db_connect_single)
+  g.cur = g.db.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+@app.after_request
+def after_request(response):
+  g.cur_breed.close()
+  g.cur.close()
+
+  g.db_breed.close()
+  g.db.close()
+  return response
+
+# 样本预处理
+@app.route('/check_sample', methods=['POST'])
+def check_sample():
+    """
+    验证样本是否已经存在(计算md5,crc32,分别到mongo,
+      源库及本地已上传库表中查询比对,存在则返回列表)
+    :return:{'title': {}, 'detail': []}
+
+    其实detail包含两种格式的dict结构
+    单样本库{'treat_sig':'s','time':'','node':'',
+              'isvirus':'','v_name':'', 'batch_id':'',
+              'check_num':'','auto_info':'','auto_stat':'',
+              'auto_avml':''}
+
+    T后台返回{'treat_sig':'t','time':'','node':'','isvirus':'',
+              'v_name':'', 'formatname':'','check_num':'','auto_info':'',
+              'auto_stat':'','auto_avml':''}
+    """
+
+    results = []
+    single_t = {'treat_sig':'t','time':'','is_virus':'',
+                  'v_name':'','check_num':'0/0',\
+                    'formatname':'','auto_info':'',\
+                      'auto_stat':'','auto_avml':''}
+    node_li = ["PREP", "PROC", "SCAN"]
+
+    action = {'is_danger':'具有危险行为　','is_file':'具有文件行为　',\
+                'is_network':'具有网络行为　', 'is_process':'具有进程行为　',\
+                  'is_registry':'具有注册表行为　'}
+
+    single_action = {'is_danger_behavior': '具有典型行为　', \
+                      'is_network_monitor': '具有网络行为　', \
+                      'is_process_monitor': '具有进程操作行为　',\
+                        'is_file_monitor': '具有文件操作行为　',\
+                         'is_register_monitor': '具有注册表操作行为　'}
+    auto_url_check = hash_uri_mapping.Mapping(host = config.auto_host,\
+                                         port = config.auto_port, \
+                                          database = config.auto_dbname,\
+                                           user = config.auto_user,\
+                                             password = config.auto_password)
+
+ 
+    # 保存文件并查询
+    _dir = config.file_tmp
+    bufs = request.files.getlist('file')
+    for buf in bufs:  
+        result = {'title': {}, 'detail': [],'flag':'t','total':0}
+        try:        
+            if not os.path.exists(_dir):
+                os.makedirs(_dir)            
+            files = buf.read()
+            
+            f_tmp = open(_dir + buf.filename, 'w')
+            for i in files:
+                f_tmp.write(i)
+            f_tmp.close()
+
+            result['title']['f_name'] = buf.filename
+            result['title']['f_size'] = config.fileSize(len(files))
+            result['title']['f_type'] = config.GetType(_dir + buf.filename)
+            result['title']['md5'] = config.GetFileMD5(files)
+            result['title']['sha'] = config.GetFileSHA1(files)
+            sample_crc32 = config.GetCRC32(files)
+            result['title']['crc'] = sample_crc32
+           
+            #查询单样本库，已上传数量信息
+            g.cur.execute("""
+                select
+                    case is_virus when false then '非恶意' when true then '恶意代码' end as is_virus,
+                    v_name, batch_id, task_deploy,
+                    to_char(up_time,'YYYY-MM-DD HH24:MI:SS') as time, auto_stat, stat
+                FROM t_user_operat_info
+                where md5 = %(md5)s and crc32 = %(crc)s;
+            """, {'md5': result['title']['md5'], 'crc': sample_crc32})
+
+            res_local = g.cur.fetchall()
+           
+            if len(res_local) != 0:          
+                for each_res_local in res_local: 
+                    node_dic = json.loads(i['task_deploy'])                    
+                    each_res_local['node'] = config.node(node_dic)
+                    each_res_local['treat_sig'] = 's'                    
+                    g.cur.execute(SingleCheckSql,{"batch_id":i['batch_id']})
+                    res_num = g.cur.fetchall()
+                    if len(res_num):
+                        each_res_local['check_num'] = res_num[0]['check_num']
+                    else:
+                        each_res_local['check_num'] = '0/0'
+                    if "AUTO" in node_dic['node_list']:
+                        g.cur.execute(SingleAutoSql,{"batch_id":each_res_local['batch_id']})
+                        res = g.cur.fetchall()
+                        # if len(res):
+                        #     each_res_local['auto_avml'] = auto_url_check.query_uri(md5 = result['title']['md5'],\
+                        #                                                 crc32 = sample_crc32, additional_info = None, \
+                        #                                                     category = 'dynamic_avml', order='desc')
+                        #     each_res_local['auto_info'] = ''
+                        #     for each_single_action in single_action:
+                        #         if res[0][each_single_action]:
+                        #             each_res_local['auto_info'] += single_action[j] + '|　'
+                        # else:
+                        #     each_res_local['auto_info'] = '无'
+                    else:
+                        each_res_local['auto_info'] = '无'
+                    result['detail'].append(i)
+                result['total'] = len(res_local)
+                print result["total"]              
+
+            #访问T后台接口，获取静态信息
+            try:            
+                try:
+                    stat_url = config.t_static_url + result['title']['md5'] + '.' + sample_crc32                
+                    res_stat = urllib2.urlopen(stat_url)
+                    # this is the bug
+                    stat_return = json.loads(res_stat.read()) 
+                except Exception as e:
+                    checkSampleLog.error('single_checkSampleError：%s' %str(e))
+                    print e
+                
+                print stat_return['basic_info']['md5'],1                  
+                
+                if  stat_return['basic_info']['md5'] != None or stat_return['basic_info']['md5'] != '':
+                    single_t['stat'] = 1
+                    single_t['time'] = stat_return['basic_info']['cp_time']
+                    single_t['formatname'] = stat_return['basic_info']['file_format']                    
+                    if stat_return['basic_info']['virus_name'] != '' and stat_return['basic_info']['virus_name'] != 'Not Found':
+                        single_t['v_name'] = stat_return['basic_info']['virus_name']
+                        single_t['is_virus'] = '恶意代码'
+                    else:
+                        single_t['is_virus'] = '非恶意'
+
+                    if len(stat_return['multi_scan']):
+                        total = len(stat_return['multi_scan'])
+                        num = 0
+                        for i in stat_return['multi_scan']:
+                            if i['scan_result'] != 'Not Found':
+                                num += 1
+                        single_t['check_num'] = str(num) + '/' + str(total)                    
+                    result['total'] = len(res_local) + 1
+            except Exception as e:
+                checkSampleLog.error('t_static_checkSampleError：%s' %str(e))        
+                print e
+
+            #获取动态信息
+            try:
+                auto_url = config.t_auto_url + result['title']['md5'] + '.' + sample_crc32
+                req_auto = urllib2.Request(url=auto_url)                
+                res_auto = urllib2.urlopen(req_auto)                
+                auto_return = json.loads(res_auto.read())                
+            except Exception,e:
+                checkSampleLog.error('t_auto_checkSampleError：%s' %str(e))   
+                          
+            if auto_return['succeed']:
+                single_t['auto_stat'] = 2
+                single_t['auto_avml'] = m.query_uri(md5 = result['title']['md5'], \
+                                                        crc32 = sample_crc32, additional_info = None, \
+                                                            category = 'dynamic_avml', order='desc')
+                node_li.append("AUTO")
+                for i in action:
+                    if auto_return['content'][i]:
+                        single_t['auto_info'] += action[i] + ' |'
+            else:
+                single_t['auto_stat'] = 0
+                single_t['auto_info'] = '无'
+            single_t['node'] = config.node(node_li)
+            result['detail'].append(single_t)
+            
+            for i in result['detail']:
+                if i['treat_sig'] == 't' and i['is_virus'] == '':
+                    result['detail'].remove(i)
+            result['detail'] = sorted(result['detail'], key = lambda x:x['time'])
+            results.append(result)
+        except Exception, e:
+            checkSampleLog.error('checkSampleError：%s' %str(e))
+            result['flag'] = 'f'
+            results.append(result)  
+    return json.dumps(results)
+    
+# 批量上传
+@app.route('/upload_single_sample', methods=['POST'])
+def upload_single_sample():
+    """
+    上传单样本及相应配置
+    """        
+    scan_list = []
+    form = request.form
+    upload_result = {"succ":[],"fail":[]}      
+    _dir = "/static/f_tmp3" 
+
+    # setting the upload condition
+    kwargs = {
+        "CONFIG": config.single_conf['CONFIG'],
+        "SOURCEINFO": {
+        # setting static operation
+            'TREATMENT': {'PROC': 'PROC'},
+            "ACTIONFLAG": config.single_conf['SOURCEINFO']['ACTIONFLAG']
+        }
+    }
+
+    # node_dic means steps of the operation
+    node_dic = {"node_list": ["PREP","PROC"]}
+         
+    if form.has_key('PROC'):
+        kwargs['SOURCEINFO']['TREATMENT']['PROC'] = form['PROC']
+        node_dic['node_list'].append("PROC")
+      
+    for i in config.single_conf['SOURCEINFO']['TREATMENT']['SCAN']:            
+        scan_list.append(i)
+
+    if len(scan_list) != 0:
+        kwargs['SOURCEINFO']['TREATMENT']['SCAN'] = scan_list
+        node_dic['node_list'].append("SCAN")
+
+    if form.has_key('MISSION'):
+        print "has mission"
+        node_dic['node_list'].append("AUTO")
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO'] = {}
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION'] = {}
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['FILE_TYPE'] = \
+            config.single_conf['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['FILE_TYPE']
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['MODE'] = \
+            config.single_conf['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['MODE']
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['TIME_TYPE'] = \
+            config.single_conf['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['TIME_TYPE']
+
+        for key in config.single_conf['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']:
+            if key in form.keys():
+                kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION'][key] = form[key]
+
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['INTERVAL_TIME'] = \
+        int(kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['INTERVAL_TIME'])
+
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['SHAREING_TIME'] = \
+        int(kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['SHAREING_TIME'])
+
+        kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['MAX_TIME'] = \
+        int(kwargs['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['MAX_TIME'])         
+
+    # 遍历文件
+    bufs = request.files.getlist("file") 
+    for buf in bufs: 
+        if not os.path.exists(_dir):
+            os.makedirs(_dir)             
+        files = buf.read()
+
+        f_tmp = open(_dir + buf.filename, 'w')
+        for i in files:
+            f_tmp.write(i)
+        f_tmp.close()       
+
+        condition = {'person_id': 1, 'username': 'mama',\
+                  'file_name': buf.filename, 'task_deploy': json.dumps(node_dic),\
+                  'note': json.dumps(json.dumps(kwargs)), 'file_size': len(files),\
+                  'file_type' : config.GetType(_dir + buf.filename),\
+                 'sample_md5': config.GetFileMD5(files), 'sample_crc32': config.GetCRC32(files),\
+                 'sha1': config.GetFileSHA1(files), 'sha256': config.GetFileSHA256(files)}       
+        param = {
+            "kwargs": json.dumps(kwargs),
+            "file_body": (buf.filename, files),
+            "md5": condition['sample_md5']
+        }
+        try:
+            http = urllib3.PoolManager()
+            flag = http.request('POST', config.upload_url, param)
+        except Exception as e:
+            uploadSingleLog.error('network_uploadSingleSampleError：%s' %str(e))
+            return str(e)
+        return_info = flag.data
+        if return_info == "error":
+            uploadSingleLog.info('uploadToTAnanlyzsisError: %s' %return_info)
+            upload_result["fail"].append(buf.filename)
+        else:
+            condition['batch_id'] = return_info
+            g.cur.execute("""
+                INSERT INTO t_user_operat_info(
+                 person_id, username, md5, crc32 , batch_id, up_time, note, file_name,task_deploy,sha1,sha256,
+                 file_size,file_type
+                 )
+                VALUES (%(person_id)s, %(username)s, %(sample_md5)s, %(sample_crc32)s, %(batch_id)s, now(),
+                %(note)s, %(file_name)s,%(task_deploy)s,%(sha1)s,%(sha256)s,%(file_size)s,%(file_type)s);
+            """, condition)
+            g.db.commit()
+            print "commit  no"
+            if form.has_key('MISSION'):
+                g.cur.execute("""
+                    UPDATE t_user_operat_info
+                       SET  auto_stat= 1
+                     WHERE batch_id = %(batch_id)s;
+                """,{'batch_id':return_info})
+                g.db.commit()
+                print "commit"
+            os.remove(_dir + buf.filename)
+            upload_result["succ"].append(buf.filename)
+    return json.dumps(upload_result) 
+
+# 批量养殖
+@app.route('/breed_upload/<time_files>', methods=['POST'])
+def upload_file(time_files=''):
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+    breed_config = config.breed_config
+    try:                
+        _dir =config.file_tmp2
+        check_type_file = config.file_tmp
+        if not os.path.exists(_dir):
+              os.makedirs(_dir)
+        bufs = request.files.getlist("file")
+
+        for buf in bufs:         
+            files = buf.read()
+            result = {"flag":{},"title":{}}
+            dict_ = ''
+            ram = ''
+
+            result['title']['f_name'] = buf.filename
+            result['title']['f_size'] = len(files)
+            result['title']['b_size'] = config.fileSize(len(files))
+            result['title']['md5'] = config.GetFileMD5(files)
+            result['title']['sha'] = config.GetFileSHA1(files)
+            sample_crc32 = config.GetCRC32(files)
+            result['title']['crc'] = sample_crc32
+            f_tmp = open(_dir + result['title']['md5']+'.'+sample_crc32, 'w')
+            for i in files:
+                  f_tmp.write(i)
+            f_tmp.close()
+
+            for i in range(0,6):
+               ram += str(random.randint(1,10))
+            file_flag = os.path.exists(check_type_file+buf.filename)
+            print file_flag
+            if file_flag:
+                try:
+                    result['title']['file_type'] = config.GetType(check_type_file+buf.filename)
+                except:
+                    result['title']['file_type'] = None
+            else:
+                f_tmp = open(check_type_file +buf.filename, 'w')
+                for i in files:
+                    f_tmp.write(i)
+                f_tmp.close()
+                try:
+                    result['title']['file_type'] = config.GetType(check_type_file+buf.filename)
+                except:
+                    breedLog.error('copy_file_breedLogError：%s' %str(e))
+            result['title']['file_type'] = "file_unkown"
+            try:
+                print result["title"]["file_type"],1
+                hash = result["title"]["md5"]+"."+result["title"]["crc"];
+                person_id = 1;
+                sql = """
+                        INSERT INTO primary_file(task_id,hash, file_size, file_name,
+                                               file_type, person_id, sha1, r_time)
+                        VALUES ((select max(task_id)from task where task_name = '%s'),
+                              '%s', '%s', '%s', '%s', '%s', '%s', now());
+                      """%(hash,hash,result["title"]["f_size"],result["title"]["f_name"],\
+                                  result["title"]["file_type"],person_id,result["title"]["sha"])
+                g.cur_breed.execute(sql)
+                g.db_breed.commit()
+            except Exception,e:
+                breedLog.error('sql_breedLogError：%s' %str(e))
+                g.db.rollback()
+                print e;
+
+            breed_config['task'] = result['title']['md5']+'.'+sample_crc32
+            breed_config['kwargs']['FILEINFO']['SHA1']= result['title']['sha']
+            breed_config['kwargs']['FILEINFO']['NAME']= result['title']['md5']+'.'+sample_crc32
+            breed_config['kwargs']['FILEINFO']['FILE_LOCATION']=config.file_location + result['title']['md5']+'.'+sample_crc32
+            breed_config['kwargs']['FILEINFO']['BATCH_ID']= time.strftime('%Y%m%d_%H%M%S',time.localtime(time.time()))+"_"+ram+'_auto'
+            breed_config['kwargs']['FILEINFO']['CRC32']= sample_crc32
+            breed_config['kwargs']['FILEINFO']['MD5']= result['title']['md5']
+            breed_config['kwargs']['FILEINFO']['SIZE']= result['title']['f_size']
+            breed_config['kwargs']['SOURCEINFO']['TREATMENT']['AUTO']['MISSION']['MAX_TIME']= int(time_files)
+            data = json.dumps(breed_config)
+            condition = {'kwargs': data}          
+            result_call=json.dumps(result)            
+            try:
+                response = requests.post(config.breed_url, condition)
+                content = response.content
+            except Exception as e:
+              breedLog.error("network_breedLog: %s" %str(e))
+              print e
+        print result['title']['file_type']
+        return json.dumps({'flag':'t'})
+    except Exception,e:
+        breedLog.error('breedLogError：%s' %str(e))
+        print e
+        return json.dumps({'flag':'f'})

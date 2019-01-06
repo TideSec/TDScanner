@@ -1,0 +1,172 @@
+时间：2015-10-20 14:19:56,362 文件：upload.py 行数：94 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:19:56,456 文件：upload.py 行数：115 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 14:23:12,409 文件：upload.py 行数：115 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 14:31:28,583 文件：upload.py 行数：94 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:50:03,465 文件：upload.py 行数：94 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:53:55,925 文件：upload.py 行数：100 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:55:29,576 文件：upload.py 行数：100 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:56:07,012 文件：upload.py 行数：100 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:56:07,068 文件：upload.py 行数：121 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 14:56:27,934 文件：upload.py 行数：100 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:56:27,950 文件：upload.py 行数：121 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 14:59:27,758 文件：upload.py 行数：100 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 14:59:27,770 文件：upload.py 行数：121 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 15:00:20,315 文件：upload.py 行数：121 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 15:07:17,369 文件：upload.py 行数：109 - ERROR: syntax error at or near "FROM"
+LINE 1: ...r, is_network_monitor, is_process_monitor,        FROM t_fin...
+                                                             ^
+
+时间：2015-10-20 15:07:17,370 文件：upload.py 行数：121 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-20 15:07:56,202 文件：upload.py 行数：121 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 15:14:20,409 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 15:15:30,569 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 15:15:54,753 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 15:16:22,385 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 15:19:11,673 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 16:02:36,190 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 16:02:58,741 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 16:08:56,190 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 16:09:19,139 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-20 16:57:31,004 文件：upload.py 行数：99 - ERROR: Checking T system  'basic_info'
+时间：2015-10-20 16:57:31,017 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 10:02:25,629 文件：upload.py 行数：99 - ERROR: Checking T system  'basic_info'
+时间：2015-10-21 18:02:36,955 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:03:55,860 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:03:56,303 文件：upload.py 行数：108 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:03:56,304 文件：upload.py 行数：120 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:12:14,313 文件：upload.py 行数：120 - ERROR: could not establish connection
+DETAIL:  could not connect to server: Network is unreachable
+	Is the server running on host "10.255.50.10" and accepting
+	TCP/IP connections on port 5432?
+
+
+时间：2015-10-21 18:12:14,466 文件：upload.py 行数：108 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-21 18:12:14,467 文件：upload.py 行数：120 - ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+时间：2015-10-22 17:42:40,641 文件：upload.py 行数：98 - ERROR: Checking T system  'basic_info'
+时间：2015-10-23 09:47:57,080 文件：upload.py 行数：98 - ERROR: Checking T system  'basic_info'
+时间：2015-10-23 10:55:23,828 文件：upload.py 行数：98 - ERROR: Checking T system  'basic_info'
+时间：2015-10-23 11:54:57,846 文件：upload.py 行数：98 - ERROR: Checking T system  'basic_info'
+时间：2015-10-23 11:55:35,415 文件：upload.py 行数：98 - ERROR: Checking T system  'basic_info'
+时间：2015-10-23 11:59:26,068 文件：upload.py 行数：98 - ERROR: Checking T system  'basic_info'
+时间：2015-10-23 11:41:40,140 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 11:42:23,739 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 11:51:12,748 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 11:54:11,554 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 12:01:56,158 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 12:04:29,569 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 15:44:33,933 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 15:52:52,492 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 15:53:48,951 文件：upload.py 行数：98 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 16:34:48,090 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-23 16:44:44,548 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 09:58:54,219 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:23:01,885 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:25:58,335 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:27:08,763 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:30:42,969 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:39:13,165 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:40:35,277 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:49:56,203 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 10:51:44,276 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 11:02:04,300 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>
+时间：2015-10-24 13:51:53,940 文件：upload.py 行数：99 - ERROR: Checking T system  <urlopen error [Errno 110] Connection timed out>

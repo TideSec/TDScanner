@@ -1,0 +1,426 @@
+--
+-- PostgreSQL database dump
+--
+CREATE DATABASE vds_base
+  WITH OWNER = postgres
+       ENCODING = 'UTF8'
+       TABLESPACE = pg_default
+       LC_COLLATE = 'en_US.UTF8'
+       LC_CTYPE = 'en_US.UTF8'
+       CONNECTION LIMIT = -1;
+	   
+\c vds_base;
+
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- Name: dblink; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS dblink WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION dblink; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION dblink IS 'connect to other PostgreSQL databases from within a database';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: org_log_at; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+--
+-- ER/Studio 8.0 SQL Code Generation
+-- Company :      Microsoft
+-- Project :      蜜罐数据结构.DM1
+-- Author :       Microsoft
+--
+-- Date Created : Monday, October 12, 2015 15:29:37
+-- Target DBMS : PostgreSQL 8.0
+--
+
+-- 
+-- TABLE: b_dionaea_info 
+--
+drop table if exists b_dionaea_info;
+
+CREATE TABLE b_dionaea_info(
+    id                      serial,
+    sid                     int4,
+    connection_type         text,
+    connection_transport    text,
+    connection_protocol     text,
+    connection_root         int4,
+    connection_parent       int4,
+    local_host              inet,
+    local_port              int4,
+    remote_host             inet,
+    remote_hostname         text,
+    remote_port             int4,
+    connection_timestamp    timestamp,
+    dcerpc                  jsonb,
+    dcerpcbinds             jsonb,
+    downloads               jsonb,
+    emu                     jsonb,
+    mssql                   jsonb,
+    mysql                   jsonb,
+    offers                  jsonb,
+    p0fs                    jsonb,
+    resolves                jsonb,
+    sip                     jsonb,
+    CONSTRAINT "PKs1" PRIMARY KEY (id)
+)
+;
+
+
+
+-- 
+-- TABLE: b_kippo_info 
+--
+drop table  if exists b_kippo_info;
+CREATE TABLE b_kippo_info(
+    id                serial,
+    sensor            int4,
+    ip                inet,
+    sensor_ip         inet,
+    termsize          varchar(20),
+    client_version    varchar(128),
+    starttime         timestamp,
+    endtime           timestamp,
+    ssh_auth          jsonb,
+    ssh_downloads     jsonb,
+    ssh_input         jsonb,
+    ssh_ttylog        jsonb,
+    CONSTRAINT "PKs2" PRIMARY KEY (id)
+)
+;
+
+CREATE TABLE org_log_at (
+    eid integer NOT NULL,
+    id character varying(50),
+    log_type character varying(10),
+    ts timestamp without time zone,
+    vxname character varying(256),
+    enname character varying(256),
+    sip inet,
+    dip inet,
+    sport integer,
+    dport integer,
+    protocol character varying(32),
+    tdir character varying(3),
+    cid integer,
+    risk integer,
+    idir character varying(10),
+    url text,
+    dom text,
+    file_format character varying(256),
+    at_vdslog_file character varying(128),
+    r_time timestamp without time zone DEFAULT now(),
+    proto_json json
+);
+
+
+ALTER TABLE public.org_log_at OWNER TO postgres;
+
+--
+-- Name: org_log_at_eid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE org_log_at_eid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.org_log_at_eid_seq OWNER TO postgres;
+
+--
+-- Name: org_log_at_eid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE org_log_at_eid_seq OWNED BY org_log_at.eid;
+
+
+--
+-- Name: org_log_h; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE org_log_h (
+    eid integer NOT NULL,
+    id character varying(10),
+    ts timestamp without time zone,
+    kbps bigint,
+    r_time timestamp without time zone DEFAULT now(),
+    pps bigint
+);
+
+
+ALTER TABLE public.org_log_h OWNER TO postgres;
+
+--
+-- Name: org_log_h_eid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE org_log_h_eid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.org_log_h_eid_seq OWNER TO postgres;
+
+--
+-- Name: org_log_h_eid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE org_log_h_eid_seq OWNED BY org_log_h.eid;
+
+
+--
+-- Name: org_log_pv; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE org_log_pv (
+    eid integer NOT NULL,
+    id character varying(50),
+    log_type character varying(10),
+    ts timestamp without time zone,
+    vxname character varying(256),
+    enname character varying(256),
+    sip inet,
+    dip inet,
+    sport integer,
+    dport integer,
+    protocol character varying(32),
+    tdir character varying(3),
+    risk integer,
+    url text,
+    dom text,
+    file_format character varying(256),
+    md5 character varying(32),
+    at_vdslog_file character varying(128),
+    r_time timestamp without time zone DEFAULT now(),
+    proto_json json,
+    virus_type character varying(128),
+    sip_int bigint,
+    dip_int bigint
+);
+
+
+ALTER TABLE public.org_log_pv OWNER TO postgres;
+
+--
+-- Name: org_log_pv_eid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE org_log_pv_eid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.org_log_pv_eid_seq OWNER TO postgres;
+
+--
+-- Name: org_log_pv_eid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE org_log_pv_eid_seq OWNED BY org_log_pv.eid;
+
+
+--
+-- Name: org_log_s; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE org_log_s (
+    eid integer NOT NULL,
+    id character varying(10),
+    ts timestamp without time zone,
+    protocol character varying(32),
+    pps bigint,
+    kbps bigint,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.org_log_s OWNER TO postgres;
+
+--
+-- Name: org_log_s_eid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE org_log_s_eid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.org_log_s_eid_seq OWNER TO postgres;
+
+--
+-- Name: org_log_s_eid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE org_log_s_eid_seq OWNED BY org_log_s.eid;
+
+
+--
+-- Name: org_log_storage; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE org_log_storage (
+    id integer NOT NULL,
+    file_name character varying(256),
+    file_index text,
+    r_time timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.org_log_storage OWNER TO postgres;
+
+--
+-- Name: org_log_storage_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE org_log_storage_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.org_log_storage_id_seq OWNER TO postgres;
+
+--
+-- Name: org_log_storage_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE org_log_storage_id_seq OWNED BY org_log_storage.id;
+
+
+--
+-- Name: eid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY org_log_at ALTER COLUMN eid SET DEFAULT nextval('org_log_at_eid_seq'::regclass);
+
+
+--
+-- Name: eid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY org_log_h ALTER COLUMN eid SET DEFAULT nextval('org_log_h_eid_seq'::regclass);
+
+
+--
+-- Name: eid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY org_log_pv ALTER COLUMN eid SET DEFAULT nextval('org_log_pv_eid_seq'::regclass);
+
+
+--
+-- Name: eid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY org_log_s ALTER COLUMN eid SET DEFAULT nextval('org_log_s_eid_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY org_log_storage ALTER COLUMN id SET DEFAULT nextval('org_log_storage_id_seq'::regclass);
+
+
+--
+-- Name: PK1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY org_log_pv
+    ADD CONSTRAINT "PK1" PRIMARY KEY (eid);
+
+
+--
+-- Name: PK1_2; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY org_log_at
+    ADD CONSTRAINT "PK1_2" PRIMARY KEY (eid);
+
+
+--
+-- Name: PK2; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY org_log_s
+    ADD CONSTRAINT "PK2" PRIMARY KEY (eid);
+
+
+--
+-- Name: PK25; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY org_log_storage
+    ADD CONSTRAINT "PK25" PRIMARY KEY (id);
+
+
+--
+-- Name: PK2_1; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY org_log_h
+    ADD CONSTRAINT "PK2_1" PRIMARY KEY (eid);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

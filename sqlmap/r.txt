@@ -1,0 +1,16 @@
+POST /eservice/servlet/com.cntaiping.eservice.ePolicy.eInvoice.EInvoiceServlet HTTP/1.1
+Host: www.cntaiping.com
+Content-Length: 125
+Accept: */*
+Origin: http://www.cntaiping.com
+X-Requested-With: XMLHttpRequest
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Referer: http://www.cntaiping.com/eservice/servlet/com.cntaiping.eservice.ePolicy.eInvoice.EInvoiceServlet
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.8
+Cookie: bdshare_firstime=1469441028984*; CoreID6=35416224391214695141639&ci=90406506; taiping_uuid=ce336014bf9645e087e8d74385fa34ab; channel=; medium=; innermedium=; tpgwsession=12dc9d48493bc672ce40794c25d2bc7b; JSESSIONID=VXIwXxLFFuM7ABHgQI0godhCTflYp6tOk9_VdnGk7hydVf5vk2MW!-2025793836; Hm_lvt_f7aa396f88259db43263ef6ad17c0090=1469440989,1469503150,1469590242,1469690353; Hm_lpvt_f7aa396f88259db43263ef6ad17c0090=1469690353; _ga=GA1.2.449852043.1469440992; _gat=1
+Connection: close
+
+methodName=queryEInvoice&policyCode=142356786514123&idno=530212199408111611&invoiceNo=444&invoiceCode=3334&validateCode=4342
+-

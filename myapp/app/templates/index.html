@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}人工养殖投放---批量投放{% endblock%}
+
+{% block index %} active {% endblock %}
+<script type="text/javascript">
+
+</script>
+
+
+{% block content %}
+<h1 style="margin-top: 250px;font-size:70px">样本人工投放</h1>
+<p class="describe">请选择需要投放的样本，可以批量投放。投放的每个样本大小不得大于10MB。单次投放样本个数不得超过50个。</p>
+<p class="describe" style="margin-top:-5px;">样本类型：PE可执行文件、办公文档文件、富文本文件、压缩格式文件、无格式样本。</p>
+
+<div style="text-align: center">
+    <button id="btn_upload" class="btn btn-add-sample-normal btn-add-sample-normala fa fa-plus scroll wow bounceInLeft animated "data-toggle="modal"
+             data-target="#upload_form" onfocus="blur()">
+             样本投放
+    </button>
+</div>
+
+<form id="upload_form" action="" method="POST" enctype="multipart/form-data" class="modal fade" tabindex="-1" role="dialog"aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 655px;">
+        <div class="modal-content">
+            <div class="modal-body " style="height: 605px">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title dialog-head-font" id="myModalLabel">
+                    请投放样本
+                </h4>
+
+                <div id = "dropbox" class="upload-contents">
+                    <div class="drop-img">
+                        <span class="fa fa-upload">
+                        </span>
+                    </div>
+                    <div class="drop-text">
+                        <span>请选择需要投放的样本文件，可以按住ctrl键，或者shift键</span><br>
+                        <span>选择多个样本进行批量上传。</span>
+                    </div>
+                </div>
+
+                <input id="file-picker" type="file" name="file"  multiple style="display:none">             
+                <button id="select-file" class="btn btn-default dialog-select-button contact-btn-select" >选择样本</button>
+
+                <button id = "checkBtn" class="btn btn-default dialog-upload-button contact-btn-upload" type="button" data-toggle="button" aria-pressed="false" autocomplete="off">上传样本</button>
+
+                <input type="text" style="display:none;" name='person_id'></input>
+                <input type="text" style="display:none;" name='username'></input>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="separator" style="display:none">
+    <div style="width:1290px;margin:0 auto">
+            <button data-toggle="modal" data-target="#myModal_set_link" class="btn btn-default btn-upload-pretreatment contact-btn-upload-pretreatment" type="button" style="margin-left: 1200px;margin-bottom:3px"  data-toggle="button" aria-pressed="false" autocomplete="off">批量投放</button>
+
+            <table class="table table-striped table-hover" id="result_table" style="width:1290px">
+                <tr id="table_head">                
+                    <th>文件名称</th>
+                    <th>类型</th>
+                    <th style="width:85px">大小</th>
+                    <th style="width:85px">是否已分析</th>
+                    <th style="width:85px">已分析次数</th>
+                    <th style="width:255px">MD5</th>
+                    <th style="width:325px">SHA1</th>
+                </tr>
+            </table>
+    </div>
+    <!--处理结果列表-->
+            
+
+    <!--设置处理环节-->
+    <div class="modal fade" id="myModal_set_link" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel_set_link" aria-hidden="true">
+        <div class="modal-dialog" style="width: 350px;margin-top:280px !important">
+
+            <div class="modal-content" >
+
+                <div class="modal-body " style="height: 250px">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+
+                    <h4 class="modal-title dialog-head-font" id="myModalLabel_set_link" style="font-size:18px;padding-bottom:5px;border-bottom:1px solid #ddd" onfocus="blur();">
+                        设置处理环节
+                    </h4 >
+                    <div style="margin-top: 10px;margin-left: 5%">
+                        <span style="margin-left: auto;font-size: 14px;font-family: Microsoft Yahei" >
+                            <input type="checkbox" checked="true" disabled="false">
+                            <span>预处理</span>
+                        </span>
+                        <span style="margin-left: 10px;font-size: 14px;font-family: Microsoft Yahei" >
+                            <input type="checkbox"checked="true"disabled="false">
+                            <span>多引擎扫描</span>
+                        </span>
+                        <span style="margin-left: 10px;font-size: 14px;font-family: Microsoft Yahei" >
+                            <input type="checkbox"checked="true"disabled="false">
+                            <span>静态分析</span>
+                        </span>
+                    </div>
+                    <div id="upload_method">
+                        <div style="margin-left: 5%;margin-right:auto;margin-top: 10px;font-size: 14px;font-family: Microsoft Yahei">                             
+                                <input type="radio" id="radio_dynamic_analysis" checked = "checked"value="动态分析">
+                                <span>动态分析</span>
+                        </div>
+
+                        <div style="margin-left: 5%;margin-top: 10px;">
+                            <span style="margin-left: auto;font-size: 14px;font-family: Microsoft Yahei" >
+                                <input type="radio" id="radio_sample_breeding"value="长期养殖">
+                                <span>长期养殖</span>
+                            </span>
+
+                        </div>
+                        <div style="margin-left: 5%;margin-right:auto;margin-top: 10px;font-size: 14px;font-family: Microsoft Yahei">
+                            <span style="margin-left:18px">养殖时长</span>
+                            <input type="text" id="input_breeding_time" placeholder="20(分钟)" disabled="false" style="font-size:12px">
+                        </div>
+                    </div>
+                    <div style="margin-left: 50%;margin-top: 5px;">
+                        <span><button id="uploadBtn" type="submit" class="btn btn-default"style="margin-top: 20px" data-dismiss="modal">确定</button></span>
+                        <span><button type="button" class="btn btn-default" data-dismiss="modal" style="margin-top: 20px;margin-left: 20px">关闭</button></span>
+                    </div>
+
+                </div>
+            </div><!-- /.modal-content -->
+        </div>
+    </div>
+
+    <button id="loading_button" data-toggle="modal" data-target="#myModal_loading" style="display:none"></button>
+    <button id="upload_result_button" data-toggle="modal" data-target="#myModal_upload_result"style="display:none"></button>
+    
+</div>
+
+<div class="modal fade" id="myModal_loading" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel_loading" aria-hidden="true" >
+        <div class="modal-dialog" style="width: 400px;margin-top:280px !important">
+        <div class="modal-content">
+            <div class="modal-body " style="height: 260px">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="display:none">
+                    &times;
+                </button>
+
+                <img src="static/css/image/loading.gif" style="margin-top: 70px;margin-left: 160px" id="myModalLabel_loading">
+                <p style="font-family: Microsoft Yahei;font-size: 20px;margin-top: 20px;text-align: center">上传中…</p>
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div>
+</div>
+
+<div class="modal fade" id="myModal_upload_result" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel_loading" aria-hidden="true" >
+        <div class="modal-dialog" style="width: 500px;margin-top:280px !important">
+        <div class="modal-content">
+            <div class="modal-head">
+                <h2 style="font-size: 20px;margin-left: 20px;font-family: Microsoft Yahei;">投放结果</h2>
+            </div>
+            <div class="modal-body " style="height: 350px;width: 490px;">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="display:none">
+                    &times;
+                </button>
+                <div style="margin-left:10px">
+                    <h5 class="label label-default label-success">投放成功:</h5>
+                    <ul id="result_success">
+                        
+                    </ul>
+                </div>
+                <div style="margin-left:10px">
+                    <h5 class="label label-default" style="background-color: rgb(255, 58, 1);">投放失败:</h5>
+                    <ul id="result_fail">
+                        
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-foot" style="height: 50px;padding-top:15px">
+                <span id="str_href" style="margin-left:30px"></span>
+            </div>
+        </div><!-- /.modal-content -->
+    </div>
+</div>
+
+{% endblock %}

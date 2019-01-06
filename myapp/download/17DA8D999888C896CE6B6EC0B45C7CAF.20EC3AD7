@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+</head>
+<body>
+<div id="page">
+<ul id="news_list">
+<li>新闻列表新闻列表 </li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+<li>新闻列表新闻列表</li>
+</ul>
+<script>
+    var obj = document.getElementById("news_list").getElementsByTagName("li");
+    for (i = 0; i < obj.length; i++) {
+         if ( (i+1) %5==0){
+         var li =document.createElement("li");
+         obj[i].appendChild(li);
+         }
+    }
+</script>
+</div>
+</body>
+</html>

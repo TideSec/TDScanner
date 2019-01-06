@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <title>TDScanner</title>
+	    <link rel = "stylesheet" type = "text/css" href = "/static/css/style.css">
+	    <link rel = "stylesheet" type = "text/css" href = "/static/css/bootstrap.css">
+	    <link rel = "stylesheet" href = "/static/css/font-awesome.css">
+	    <link rel = "stylesheet" type = "text/css" href = "/static/css/style.css">    
+	    <link rel = "stylesheet" href = "/static/css/animate.css">
+	</head>
+	<body >
+	    <header class="navbar navbar-static-top bs-docs-nav" id="top" role="banner">
+		  <div class="container">
+{#		    <div class="navbar-header">#}
+{#		      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false">#}
+{#		        <span class="sr-only">Toggle navigation</span>#}
+{#		        <span class="icon-bar"></span>#}
+{#		        <span class="icon-bar"></span>#}
+{#		        <span class="icon-bar"></span>#}
+{#		      </button>#}
+{#		      <a href="../" class="navbar-brand">返回主页</a>#}
+{#		    </div>#}
+		    <nav id="bs-navbar" class="collapse navbar-collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+					  	<a href="/index">TDScanner</a>
+					</li>
+					<li>
+					  	<a href="/manager">项目管理</a>
+					</li>
+					<li>
+					  	<a href="http://www.TDScan.org" target="_blank">关于</a>
+					</li>
+				</ul>
+		    </nav>		   
+		  </div>
+		</header>
+
+		<div class="bs-docs-header1" id="content" tabindex="-1">
+	      <div class="container">
+	        <h1 class="text-center">项目管理器</h1>
+
+{#	        <p class="lead">#}
+{#		      	<a href="/manager" class="btn btn-outline-inverse btn-lg trace-btn">项目列表</a>#}
+{#		      	<a href="/" class="btn btn-outline-inverse btn-lg trace-btn">注入检测</a>#}
+{#		    </p>#}
+	      </div>
+	    </div>
+	    <div class="container">
+			<ul class="list-group">
+				<li class="list-group-item active">项目列表</li>
+	    	{% for url in result_infos %}
+
+	    		<li class="list-group-item">
+{#                    <span class="label label-default">网站id:</span>#}
+{#                    <span class="label label-success">{{url[0]}}</span>#}
+                    <span class="label label-default">网址:</span>
+                    <span class="label label-info">
+                        <a href="/view/{{url[0]}}">{{url[1]}}</a>
+                    </span>
+
+                    <div class="pull-right">
+                        <div class="btn-group btn-group-xs">
+                            <a class="btn btn-danger" href="/checksqli/{{url[0]}}" role="button">注入检测</a>
+                            <a class="btn btn-success" href="/netexplore/{{url[1].strip('http:').strip('/')}}" role="button">网段扫描</a>
+                            <a class="btn btn-info" href="#" role="button">关联ip扫描</a>
+                            <a class="btn btn-danger" href="#" role="button">框架漏洞扫描</a>
+                            <a class="btn btn-primary" href="#" role="button">GITHUB泄露检查</a>
+                            <a class="btn btn-warning" href="/dellog/{{url[0]}}" role="button">删除项目</a>
+
+                        </div>
+                    </div>
+                </li>
+
+			 {% endfor %}
+			</ul>
+	    </div>
+	    
+
+	</body>	    
+	<script type = "text/javascript" src="/static/js/jquery-2.0.3.min.js"> </script>
+	<script type = "text/javascript" src="/static/js/bootstrap.js"></script>
+	<script type = "text/javascript" src="/static/js/Chart.min.js"></script>
+	<script type="text/javascript">
+		
+
+	</script>	
+</html>
