@@ -61,22 +61,22 @@ python2 main.py
 
 - 主入口界面
 
-![pic](pic1.png)
+![pic](images/pic1.png)
 
 - 项目管理
-![pic](pic2.png)
+![pic](images/pic2.png)
 
 - 信息搜集
 
-![pic](pic3.png)
+![pic](images/pic3.png)
 
 - 注入检测任务
 
-![pic](pic4.png)
+![pic](images/pic4.png)
 
 - 注入任务
 
-![pic](pic5.png)
+![pic](images/pic5.png)
 
 
 # ToDo
