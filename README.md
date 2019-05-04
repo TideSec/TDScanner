@@ -84,4 +84,7 @@ python2 main.py
 - 用php+python重新打造一个新的平台
 
 
+# 和我联系
 
+
+<div align=center><img src=images/zjwf.png width=30% ></div>
